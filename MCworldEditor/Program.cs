@@ -5,7 +5,6 @@
         static int Main(string[] args)
         {
             Commands commands = new Commands();
-            commands.PrepareCommands(args);
             return commands.CallCommand(args);
         }
     }

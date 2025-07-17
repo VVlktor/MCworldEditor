@@ -1,6 +1,4 @@
-﻿using Microsoft.VisualBasic.FileIO;
-using System.CommandLine;
-using System.Numerics;
+﻿using System.CommandLine;
 
 namespace MCworldEditor
 {
@@ -8,6 +6,7 @@ namespace MCworldEditor
     {
         private InventoryCommands inventoryCommands = new();
         private ChunkCommands chunkCommands = new();
+        PlayerCommands playerCommands = new();
 
         private RootCommand rootCommand;
         private Argument<int> _worldNumberArgument;
@@ -16,12 +15,9 @@ namespace MCworldEditor
         {
             rootCommand = new($"CLI for editing Minecraft beta worlds.\nKeep your world in default directory for it to work ( {Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), ".minecraft", "saves")} )");
             _worldNumberArgument = CreateWorldNumberArgument();
-        }
-
-        public void PrepareCommands(string[] args)
-        {
             AddInventoryCommands();
             AddChunkCommands();
+            AddPlayerCommands();
         }
 
         public int CallCommand(string[] args)
@@ -29,40 +25,68 @@ namespace MCworldEditor
             return rootCommand.Parse(args).Invoke();
         }
 
-        public void AddChunkCommands()
+        private void AddPlayerCommands()
+        {
+            Command playerCommand = new("player", "Commands realted to player.");
+            rootCommand.Subcommands.Add(playerCommand);
+
+            Command positionCommand = new("position", "Operations on player's position");
+            playerCommand.Subcommands.Add(positionCommand);
+
+            Command changePosition = new("change", "Changes position of player to specified one");//TODO dodac akcje, A TAKZE opcje/flage zeby nie moglo przeniesc jesli są w tym miejscu bloki
+            changePosition.Aliases.Add("move");
+            positionCommand.Subcommands.Add(changePosition);
+
+            Option<bool> specificReadPosition = new("--specific") { 
+                Description = "Defines wheather coordinates should be rounded."
+            };
+            specificReadPosition.Aliases.Add("--exact");
+            specificReadPosition.Aliases.Add("--not-rounded");
+
+            Command readPosition = new("read", "Reads position of player and displays it") { _worldNumberArgument, specificReadPosition };
+            readPosition.Aliases.Add("check");
+            positionCommand.Subcommands.Add(readPosition);
+            readPosition.SetAction(arguments => playerCommands.ReadPosition(arguments.GetValue(_worldNumberArgument), arguments.GetValue(specificReadPosition)));
+        }
+
+        private void AddChunkCommands()
         {
             Command chunkCommand = new("chunk", "Allows to operate on chunks");
 
             rootCommand.Subcommands.Add(chunkCommand);
 
-            Argument<int> searchForBlockIdArgument = new("blockId") { 
+            Argument<int> searchForBlockIdArgument = new("blockId")
+            {
                 Description = "ID of the block to search for."
             };
 
             Option<int> xOption = new("-x")
             {
-                Description = "In-world X coordinates",
-                Required = true
+                Description = "In-world X coordinates. If not specified player's position will be used."
             };
 
             Option<int> zOption = new("-z")
             {
-                Description = "In-world Z coordinates",
-                Required = true
+                Description = "In-world Z coordinates. If not specified player's position will be used."
             };
 
             Command searchForBlockCommand = new("count", "Searches for block with specified id on chunk with provided coordinates") { _worldNumberArgument, searchForBlockIdArgument, xOption, zOption };
-            searchForBlockCommand.SetAction(arguments=>chunkCommands.CountBlocksOnChunk(arguments.GetValue(_worldNumberArgument), arguments.GetValue(searchForBlockIdArgument), arguments.GetValue(xOption), arguments.GetValue(zOption)));
+            searchForBlockCommand.SetAction(arguments => chunkCommands.CountBlocksOnChunk(arguments.GetValue(_worldNumberArgument), arguments.GetValue(searchForBlockIdArgument), arguments.GetValue(xOption), arguments.GetValue(zOption)));
             chunkCommand.Subcommands.Add(searchForBlockCommand);
+
+            Command chunkDimensionsCommand = new("dimensions", "Displays the X, Y, Z coordinates of the chunk corners for the given position.") { xOption, zOption };
+            chunkDimensionsCommand.Aliases.Add("corners");
+            chunkDimensionsCommand.SetAction(arguments => chunkCommands.ChunkDimensions(arguments.GetValue(xOption), arguments.GetValue(zOption)));
+            chunkCommand.Subcommands.Add(chunkDimensionsCommand);
         }
 
-        public void AddInventoryCommands()
+        private void AddInventoryCommands()
         {
             Command inventoryCommand = new("inventory", "Handles operations related to player's inventory.");
 
             rootCommand.Subcommands.Add(inventoryCommand);
 
-            Argument<int> addItemArgument = new("itemId")
+            Argument<int> itemIdArgument = new("itemId")
             {
                 Description = "Id of item"
             };
@@ -70,14 +94,14 @@ namespace MCworldEditor
             Option<int> addItemCountOption = new("--count")
             {
                 DefaultValueFactory = count => 1,
-                Description = "Number of items to add"
+                Description = "Number of items to add (max 127 items)",
             };
             addItemCountOption.Aliases.Add("--amount");
 
-            Command addItemCommand = new("add", "Adds item with specified id to inventory") { _worldNumberArgument, addItemArgument };
+            Command addItemCommand = new("add", "Adds item with specified id to inventory") { _worldNumberArgument, itemIdArgument };
             addItemCommand.Options.Add(addItemCountOption);
             inventoryCommand.Subcommands.Add(addItemCommand);
-            addItemCommand.SetAction(arguments => inventoryCommands.AddItemToInventory(arguments.GetValue(_worldNumberArgument), arguments.GetValue(addItemArgument), arguments.GetValue(addItemCountOption)));
+            addItemCommand.SetAction(arguments => inventoryCommands.AddItemToInventory(arguments.GetValue(_worldNumberArgument), arguments.GetValue(itemIdArgument), arguments.GetValue(addItemCountOption)));
 
             Command clearInventoryCommand = new("clear", "Clears inventory") { _worldNumberArgument };
             clearInventoryCommand.Aliases.Add("clean");

@@ -1,12 +1,34 @@
 ﻿using fNbt;
+using System.Text;
 
 namespace MCworldEditor
 {
     public class ChunkCommands
     {
-        public int CountBlocksOnChunk(int worldId, int blockId, int x, int z)
+        private PlayerCommands playerCommands = new();
+
+        public int ChunkDimensions(int? x, int? z)
         {
-            string chunkPath = GetChunkPathByCoordinates(worldId, x, 0, z);
+            int searched = x < 0 ? -15 : 0;
+            while (x % 16 != searched)
+                x--;
+
+            searched = z < 0 ? -15 : 0;
+            while (z % 16 != searched)
+                z--;
+
+            Console.WriteLine($"Start:\n\tX: {x}\n\tY: 0\n\tZ: {z}\nEnd:\n\tX: {x + 15}\n\tY: 128\n\tZ: {z + 15}");
+            return 0;
+        }
+
+        public int CountBlocksOnChunk(int worldId, int blockId, int? x, int? z)
+        {
+            var playerPosition = playerCommands.GetPlayerPositionInt(worldId);
+
+            int X = x is null ? playerPosition.X : (int)x;
+            int Z = z is null ? playerPosition.Z : (int)z;
+
+            string chunkPath = GetChunkPathByCoordinates(worldId, X, 0, Z);
             if (!File.Exists(chunkPath))
             {
                 Console.ForegroundColor = ConsoleColor.Red;
@@ -22,7 +44,7 @@ namespace MCworldEditor
             }
             var levelTag = nbtFile.RootTag.Get<NbtCompound>("Level");
             var blocks = levelTag!.Get<NbtByteArray>("Blocks")!.Value;
-            int blockCount = blocks.Count(x => x == blockId);
+            int blockCount = blocks.Count(b => b == blockId);
             Console.WriteLine($"Number of blocks with id {blockId}: {blockCount}");
             return 0;
         }
@@ -36,7 +58,7 @@ namespace MCworldEditor
             string signed36Z = ToSignedBase36(chunkZ);
             string f1 = ToBase36(chunkX);
             string f2 = ToBase36(chunkZ);
-            string path = Path.Combine(@"C:\Users\Admin\AppData\Roaming\.minecraft\saves\World"+worldNumber, f1, f2, $"c.{signed36X}.{signed36Z}.dat");
+            string path = Path.Combine(@"C:\Users\Admin\AppData\Roaming\.minecraft\saves\World" + worldNumber, f1, f2, $"c.{signed36X}.{signed36Z}.dat");
             return path;
         }
 
@@ -56,13 +78,14 @@ namespace MCworldEditor
         private string ToSignedBase36(int value)
         {
             const string chars = "0123456789abcdefghijklmnopqrstuvwxyz";
-            if (value == 0) return "0";
+            if (value == 0)
+                return "0";
 
             bool isNegative = value < 0;
-            if (isNegative) 
+            if (isNegative)
                 value = -value;
 
-            var result = new System.Text.StringBuilder();
+            var result = new StringBuilder();
 
             while (value > 0)
             {
