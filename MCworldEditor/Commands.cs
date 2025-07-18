@@ -97,6 +97,24 @@ namespace MCworldEditor
                 Description = "Number of items to add (max 127 items)",
             };
             addItemCountOption.Aliases.Add("--amount");
+            addItemCountOption.Validators.Add(result =>
+            {
+                if (result.Tokens.Count != 1)
+                {
+                    result.AddError("Number for amount is required.");
+                    return;
+                }
+                if (!int.TryParse(result.Tokens[0].Value, out int amountNumber))
+                {
+                    result.AddError("Number is required.");
+                    return;
+                }
+                if (amountNumber<1)
+                {
+                    result.AddError("Amount is too small.");
+                    return;
+                }
+            });
 
             Command addItemCommand = new("add", "Adds item with specified id to inventory") { _worldNumberArgument, itemIdArgument };
             addItemCommand.Options.Add(addItemCountOption);
