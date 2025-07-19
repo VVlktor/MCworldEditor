@@ -1,6 +1,7 @@
 ﻿using fNbt;
+using System.IO;
 
-namespace MCworldEditor
+namespace MCworldEditor.CommandsToCall
 {
     public class PlayerCommands
     {
@@ -41,6 +42,28 @@ namespace MCworldEditor
                 Console.WriteLine($"X: {positionDouble.X}\nY: {positionDouble.Y}\nZ: {positionDouble.Z}");
             else
                 Console.WriteLine($"X: {(int)positionDouble.X}\nY: {(int)positionDouble.Y}\nZ: {(int)positionDouble.Z}");
+            return 0;
+        }
+
+        public int ChangePlayerPosition(int worldId, int x, int y, int z, bool safe)
+        {
+            Console.WriteLine($"{worldId}, x: {x}, y {y}, z {z}, safe: {safe}");
+            return 0;
+        }
+
+        public int ReadSpawn(int worldId)
+        {
+            NbtFile nbtFile = new NbtFile();
+            string path = Path.Combine(@"C:\Users\Admin\AppData\Roaming\.minecraft\saves\World" + worldId, "level.dat");
+            using (FileStream stream = File.OpenRead(path))
+            {
+                nbtFile.LoadFromStream(stream, NbtCompression.AutoDetect);
+            }
+            var dataTag = nbtFile.RootTag.Get<NbtCompound>("Data");
+            var xSpawn = dataTag!.Get<NbtInt>("SpawnX")!.IntValue;
+            var ySpawn = dataTag!.Get<NbtInt>("SpawnY")!.IntValue;
+            var zSpawn = dataTag!.Get<NbtInt>("SpawnZ")!.IntValue;
+            Console.WriteLine($"X: {xSpawn}\nY: {ySpawn}\nZ: {zSpawn}");
             return 0;
         }
     }

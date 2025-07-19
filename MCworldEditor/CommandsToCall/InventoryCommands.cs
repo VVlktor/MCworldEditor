@@ -1,6 +1,6 @@
 ﻿using fNbt;
 
-namespace MCworldEditor
+namespace MCworldEditor.CommandsToCall
 {
     public class InventoryCommands
     {

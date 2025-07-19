@@ -1,9 +1,9 @@
 ﻿using fNbt;
 using System.Text;
 
-namespace MCworldEditor
+namespace MCworldEditor.CommandsToCall
 {
-    public class ChunkCommands
+    public class WorldCommands
     {
         private PlayerCommands playerCommands = new();
 
