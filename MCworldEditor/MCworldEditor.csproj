@@ -9,6 +9,7 @@
 
   <ItemGroup>
     <PackageReference Include="fNbt" Version="1.0.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.7" />
     <PackageReference Include="System.CommandLine" Version="2.0.0-beta5.25306.1" />
   </ItemGroup>
 

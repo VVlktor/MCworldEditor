@@ -4,6 +4,13 @@ namespace MCworldEditor.CommandsToCall
 {
     public class InventoryCommands
     {
+        private DatHelper _datHelper;
+
+        public InventoryCommands(DatHelper datHelper)//komende na czytanie zawartosci inventory
+        {
+            _datHelper = datHelper;
+        }
+
         public int AddItemToInventory(int worldNumber, int itemId, int count)//TODO: dodac petle zeby mozna bylo dodawac wiecej niz 127 itemow na raz
         {
             string path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), ".minecraft", "saves", $"World{worldNumber}", "level.dat");

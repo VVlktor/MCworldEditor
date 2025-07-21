@@ -1,10 +1,29 @@
-﻿namespace MCworldEditor
+﻿using MCworldEditor.CommandsProvider;
+using MCworldEditor.CommandsToCall;
+using Microsoft.Extensions.DependencyInjection;
+
+namespace MCworldEditor
 {
     internal class Program
     {
         static int Main(string[] args)
         {
-            Commands commands = new Commands();
+            ServiceCollection builder = new();
+            builder.AddTransient<Commands>();
+            
+            builder.AddTransient<InventoryCommands>();
+            builder.AddTransient<InventoryCommandsProvider>();
+
+            builder.AddTransient<PlayerCommands>();
+            builder.AddTransient<PlayerCommandsProvider>();
+
+            builder.AddTransient<WorldCommands>();
+            builder.AddTransient<WorldCommandsProvider>();
+
+            builder.AddTransient<DatHelper>();
+
+            ServiceProvider services = builder.BuildServiceProvider();
+            Commands commands = services.GetRequiredService<Commands>();
             return commands.CallCommand(args);
         }
     }

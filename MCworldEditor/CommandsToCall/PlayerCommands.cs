@@ -1,43 +1,45 @@
 ﻿using fNbt;
+using System.Drawing;
 using System.IO;
 
 namespace MCworldEditor.CommandsToCall
 {
     public class PlayerCommands
     {
-        public (int X, int Y, int Z) GetPlayerPositionInt(int worldId)
-        {
-            NbtFile nbtLevelFile = new NbtFile();
-            string path = Path.Combine(@"C:\Users\Admin\AppData\Roaming\.minecraft\saves\World" + worldId, "level.dat");
-            using (FileStream stream = File.OpenRead(path))
-            {
-                nbtLevelFile.LoadFromStream(stream, NbtCompression.AutoDetect);
-            }
-            var dataTag = nbtLevelFile.RootTag.Get<NbtCompound>("Data");
-            var playerTag = dataTag!.Get<NbtCompound>("Player");
-            var positionTag = playerTag!.Get<NbtList>("Pos");
+        private DatHelper _datHelper;
 
-            return ((int)positionTag![0].DoubleValue, (int)positionTag![1].DoubleValue, (int)positionTag![2].DoubleValue);
+        public PlayerCommands(DatHelper datHelper)
+        {
+            _datHelper = datHelper;
         }
 
-        private (double X, double Y, double Z) GetPlayerPositionDouble(int worldId)
+        public int SetSpawnPoint(int worldId, int x, int y, int z, bool safe)
         {
-            NbtFile nbtLevelFile = new NbtFile();
+            NbtFile nbtFile = new NbtFile();
             string path = Path.Combine(@"C:\Users\Admin\AppData\Roaming\.minecraft\saves\World" + worldId, "level.dat");
             using (FileStream stream = File.OpenRead(path))
             {
-                nbtLevelFile.LoadFromStream(stream, NbtCompression.AutoDetect);
+                nbtFile.LoadFromStream(stream, NbtCompression.AutoDetect);
             }
-            var dataTag = nbtLevelFile.RootTag.Get<NbtCompound>("Data");
-            var playerTag = dataTag!.Get<NbtCompound>("Player");
-            var positionTag = playerTag!.Get<NbtList>("Pos");
 
-            return (positionTag![0].DoubleValue, positionTag![1].DoubleValue, positionTag![2].DoubleValue);
+            var dataTag = nbtFile.RootTag.Get<NbtCompound>("Data");
+            if (safe && (_datHelper.CheckIfBlock(worldId, x, y+1, z) || _datHelper.CheckIfBlock(worldId, x, y + 2, z) || y > 126))//poprawic zeby CheckIfBlock nie robil exception przy y>128 (jak dam y=200000 to wywala byte)
+            {
+                Console.WriteLine("Unable to safely change the spawnpoint.");
+                return 1;
+            }
+            dataTag!.Get<NbtInt>("SpawnX")!.Value = x; 
+            dataTag!.Get<NbtInt>("SpawnY")!.Value = y; 
+            dataTag!.Get<NbtInt>("SpawnZ")!.Value = z;
+
+            nbtFile.SaveToFile(path, NbtCompression.GZip);
+            return 0;
+
         }
 
         public int ReadPosition(int worldId, bool specific)
         {
-            var positionDouble = GetPlayerPositionDouble(worldId);
+            var positionDouble = _datHelper.GetPlayerPositionDouble(worldId);
             if (specific)
                 Console.WriteLine($"X: {positionDouble.X}\nY: {positionDouble.Y}\nZ: {positionDouble.Z}");
             else
@@ -45,9 +47,27 @@ namespace MCworldEditor.CommandsToCall
             return 0;
         }
 
-        public int ChangePlayerPosition(int worldId, int x, int y, int z, bool safe)
+        public int SetPlayerPosition(int worldId, int x, int y, int z, bool safe)
         {
-            Console.WriteLine($"{worldId}, x: {x}, y {y}, z {z}, safe: {safe}");
+            NbtFile nbtFile = new NbtFile();
+            string path = Path.Combine(@"C:\Users\Admin\AppData\Roaming\.minecraft\saves\World" + worldId, "level.dat");
+            using (FileStream stream = File.OpenRead(path))
+            {
+                nbtFile.LoadFromStream(stream, NbtCompression.AutoDetect);
+            }
+
+            var posTag = nbtFile.RootTag.Get<NbtCompound>("Data")!.Get<NbtCompound>("Player")!.Get<NbtList>("Pos");
+            posTag!.Clear();
+            if(safe && (_datHelper.CheckIfBlock(worldId, x, y, z) || y<1 || _datHelper.CheckIfBlock(worldId, x, y-1, z)))
+            {
+                Console.WriteLine("Unable to safely change the player's position.");
+                return 1;
+            }
+            posTag.Add(new NbtDouble() { Value = x + (x>=0 ? 0.5 : -0.5) });
+            posTag.Add(new NbtDouble() { Value = y + 0.7 });
+            posTag.Add(new NbtDouble() { Value = z + (z>=0 ? 0.5 : -0.5) });
+
+            nbtFile.SaveToFile(path, NbtCompression.GZip);
             return 0;
         }
 
