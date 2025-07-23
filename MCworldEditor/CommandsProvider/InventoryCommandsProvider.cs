@@ -13,7 +13,7 @@ namespace MCworldEditor.CommandsProvider
             _inventoryCommands = inventoryCommands;
             _datHelper = datHelper;
         }
-
+        //komende na czytanie zawartosci inventory
         public void Register(RootCommand rootCommand, Option<int> worldOption)
         {
             Command inventoryCommand = new("inventory", "Handles operations related to player's inventory.");
@@ -29,9 +29,9 @@ namespace MCworldEditor.CommandsProvider
                 Description = "Id of item"
             };
 
-            Option<int> addItemCountOption = new("--count")//TODO: zmienic poprostu na required
+            Option<int> addItemCountOption = new("--count")
             {
-                DefaultValueFactory = count => 1,
+                Required = true,
                 Description = "Number of items to add (max 127 items)",
             };
             addItemCountOption.Aliases.Add("--amount");
@@ -57,7 +57,7 @@ namespace MCworldEditor.CommandsProvider
             Command addItemCommand = new("add", "Adds item with specified id to inventory") { itemIdArgument };
             addItemCommand.Options.Add(addItemCountOption);
             inventoryCommand.Subcommands.Add(addItemCommand);
-            addItemCommand.SetAction(arguments => _inventoryCommands.AddItemToInventory(arguments.GetValue(worldOption), arguments.GetValue(itemIdArgument), arguments.GetValue(addItemCountOption)));
+            addItemCommand.SetAction(context => _inventoryCommands.AddItemToInventory(context.GetValue(worldOption), context.GetValue(itemIdArgument), context.GetValue(addItemCountOption)));
         }
 
         private void RegisterClearInventoryCommand(Command inventoryCommand, Option<int> worldOption)
@@ -65,7 +65,7 @@ namespace MCworldEditor.CommandsProvider
             Command clearInventoryCommand = new("clear", "Clears inventory");
             clearInventoryCommand.Aliases.Add("clean");
             inventoryCommand.Subcommands.Add(clearInventoryCommand);
-            clearInventoryCommand.SetAction(arguments => _inventoryCommands.ClearInventory(arguments.GetValue(worldOption)));
+            clearInventoryCommand.SetAction(context => _inventoryCommands.ClearInventory(context.GetValue(worldOption)));
         }
     }
 }

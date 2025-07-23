@@ -1,4 +1,5 @@
 ﻿using fNbt;
+using System.IO;
 using System.Text;
 
 namespace MCworldEditor.CommandsToCall
@@ -10,6 +11,35 @@ namespace MCworldEditor.CommandsToCall
         public WorldCommands(DatHelper datHelper)
         {
             _datHelper = datHelper;
+        }
+        
+        public int SetSeed(int worldId, long seed)
+        {
+            NbtFile nbtFile = new NbtFile();
+            string path = Path.Combine(@"C:\Users\Admin\AppData\Roaming\.minecraft\saves\World" + worldId, "level.dat");
+
+            using (FileStream stream = File.OpenRead(path))
+            {
+                nbtFile.LoadFromStream(stream, NbtCompression.AutoDetect);
+            }
+            var seedTag = nbtFile.RootTag.Get<NbtCompound>("Data")!.Get<NbtLong>("RandomSeed");
+            seedTag!.Value = seed;
+            nbtFile.SaveToFile(path, NbtCompression.GZip);
+            return 0;
+        }
+
+        public int ReadSeed(int worldId)
+        {
+            NbtFile nbtFile = new NbtFile();
+            string path = Path.Combine(@"C:\Users\Admin\AppData\Roaming\.minecraft\saves\World" + worldId, "level.dat");
+
+            using (FileStream stream = File.OpenRead(path))
+            {
+                nbtFile.LoadFromStream(stream, NbtCompression.AutoDetect);
+            }
+            var seedTag = nbtFile.RootTag.Get<NbtCompound>("Data")!.Get<NbtLong>("RandomSeed");
+            Console.WriteLine($"Seed: {seedTag!.Value}");
+            return 0;
         }
 
         public int ChunkDimensions(int? x, int? z)//TODO: pobierac pozycje gracza jesli nie podano x lub z

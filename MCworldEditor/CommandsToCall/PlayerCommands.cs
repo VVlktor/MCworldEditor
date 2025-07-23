@@ -1,4 +1,5 @@
 ﻿using fNbt;
+using System.CommandLine;
 using System.Drawing;
 using System.IO;
 
@@ -11,6 +12,22 @@ namespace MCworldEditor.CommandsToCall
         public PlayerCommands(DatHelper datHelper)
         {
             _datHelper = datHelper;
+        }
+
+        public int SetHealth(int worldId, short hp)
+        {
+            NbtFile nbtFile = new NbtFile();
+
+            string path = Path.Combine(@"C:\Users\Admin\AppData\Roaming\.minecraft\saves\World" + worldId, "level.dat");
+            using (FileStream stream = File.OpenRead(path))
+            {
+                nbtFile.LoadFromStream(stream, NbtCompression.AutoDetect);
+            }
+            var healthTag = nbtFile.RootTag.Get<NbtCompound>("Data")!.Get<NbtCompound>("Player")!.Get<NbtShort>("Health");
+            healthTag!.Value = hp;
+
+            nbtFile.SaveToFile(path, NbtCompression.GZip);
+            return 0;
         }
 
         public int SetSpawnPoint(int worldId, int x, int y, int z, bool safe)

@@ -6,7 +6,7 @@ namespace MCworldEditor.CommandsToCall
     {
         private DatHelper _datHelper;
 
-        public InventoryCommands(DatHelper datHelper)//komende na czytanie zawartosci inventory
+        public InventoryCommands(DatHelper datHelper)
         {
             _datHelper = datHelper;
         }

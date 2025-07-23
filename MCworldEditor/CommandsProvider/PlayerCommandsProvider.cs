@@ -1,10 +1,5 @@
 ﻿using MCworldEditor.CommandsToCall;
-using System;
-using System.Collections.Generic;
 using System.CommandLine;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MCworldEditor.CommandsProvider
 {
@@ -18,7 +13,7 @@ namespace MCworldEditor.CommandsProvider
             _datHelper = datHelper;
             _playerCommands = playerCommands;
         }
-
+        //komende na falldistance, komende na uratowanie - ustawienie hp na max, sprawdzenie czy nie jest w lawie, usuniecie potworow dookola etc.
         public void Register(RootCommand rootCommand, Option<int> worldOption)
         {
             Command playerCommand = new("player", "Commands realted to player.");
@@ -44,6 +39,27 @@ namespace MCworldEditor.CommandsProvider
 
             RegisterPositionCommands(playerCommand, worldOption, xPositionArgument, yPositionArgument, zPositionArgument, safeNewPosition);
             RegisterSpawnCommands(playerCommand, worldOption, xPositionArgument, yPositionArgument, zPositionArgument, safeNewPosition);
+            RegisterHealthCommand(playerCommand, worldOption);
+        }
+
+        private void RegisterHealthCommand(Command playerCommand, Option<int> worldOption)
+        {
+            Command healthCommand = new("health", "Commands related to health of player");
+            playerCommand.Subcommands.Add(healthCommand);
+
+            RegisterSetHealthCommand(healthCommand, worldOption);
+        }
+
+        private void RegisterSetHealthCommand(Command healthCommand, Option<int> worldOption)
+        {
+            Argument<short> hpCount = new("hpNumber")
+            {
+                Description = "Number of hp to set (1 = half hp)"
+            };
+            Command setHealth = new("set", "Sets hp of player.") { worldOption, hpCount };
+            healthCommand.Subcommands.Add(setHealth);
+
+            setHealth.SetAction(context => _playerCommands.SetHealth(context.GetValue(worldOption), context.GetValue(hpCount)));
         }
 
         private void RegisterSpawnCommands(Command playerCommand, Option<int> worldOption, Argument<int> xPositionArgument, Argument<int> yPositionArgument, Argument<int> zPositionArgument, Option<bool> safeNewPosition)
@@ -60,7 +76,7 @@ namespace MCworldEditor.CommandsProvider
             Command readSpawn = new("read", "Displays coordinates of spawn.");
             spawnCommand.Subcommands.Add(readSpawn);
             readSpawn.Aliases.Add("check");
-            readSpawn.SetAction(arguments => _playerCommands.ReadSpawn(arguments.GetValue(worldOption)));
+            readSpawn.SetAction(context => _playerCommands.ReadSpawn(context.GetValue(worldOption)));
         }
 
         private void RegisterChangeSpawnPointCommand(Command spawnCommand, Option<int> worldOption, Argument<int> xPositionArgument, Argument<int> yPositionArgument, Argument<int> zPositionArgument, Option<bool> safeNewPosition)
@@ -68,11 +84,10 @@ namespace MCworldEditor.CommandsProvider
             Command changeSpawnPoint = new("set", "Sets new spawnpoint.") { xPositionArgument, yPositionArgument, zPositionArgument, safeNewPosition };
             changeSpawnPoint.Aliases.Add("change");
             spawnCommand.Subcommands.Add(changeSpawnPoint);
-            changeSpawnPoint.SetAction(arguments => _playerCommands.SetSpawnPoint(arguments.GetValue(worldOption), arguments.GetValue(xPositionArgument), arguments.GetValue(yPositionArgument), arguments.GetValue(zPositionArgument), arguments.GetValue(safeNewPosition)));
-
+            changeSpawnPoint.SetAction(context => _playerCommands.SetSpawnPoint(context.GetValue(worldOption), context.GetValue(xPositionArgument), context.GetValue(yPositionArgument), context.GetValue(zPositionArgument), context.GetValue(safeNewPosition)));
         }
 
-        private void RegisterPositionCommands(Command playerCommand, Option<int> worldOption, Argument<int> xPositionArgument, Argument<int> yPositionArgument, Argument<int> zPositionArgument, Option<bool> safeNewPosition)//komende na zmiane spawn x y z, komende na zmiane hp, komende na falldistance
+        private void RegisterPositionCommands(Command playerCommand, Option<int> worldOption, Argument<int> xPositionArgument, Argument<int> yPositionArgument, Argument<int> zPositionArgument, Option<bool> safeNewPosition)
         {
             Command positionCommand = new("position", "Operations on player's position");
             playerCommand.Subcommands.Add(positionCommand);
@@ -90,10 +105,10 @@ namespace MCworldEditor.CommandsProvider
 
         private void RegisterChangePositionCommand(Command positionCommand, Option<int> worldOption, Argument<int> xPositionArgument, Argument<int> yPositionArgument, Argument<int> zPositionArgument, Option<bool> safeNewPosition)
         {
-            Command changePosition = new("change", "Changes position of player to specified one") { xPositionArgument, yPositionArgument, zPositionArgument, safeNewPosition };
+            Command changePosition = new("set", "Sets position of player to specified one") { xPositionArgument, yPositionArgument, zPositionArgument, safeNewPosition };
             changePosition.Aliases.Add("move");
             positionCommand.Subcommands.Add(changePosition);
-            changePosition.SetAction(arguments => _playerCommands.SetPlayerPosition(arguments.GetValue(worldOption), arguments.GetValue(xPositionArgument), arguments.GetValue(yPositionArgument), arguments.GetValue(zPositionArgument), arguments.GetValue(safeNewPosition)));
+            changePosition.SetAction(context => _playerCommands.SetPlayerPosition(context.GetValue(worldOption), context.GetValue(xPositionArgument), context.GetValue(yPositionArgument), context.GetValue(zPositionArgument), context.GetValue(safeNewPosition)));
         }
 
         private void RegisterReadPositionCommand(Command positionCommand, Option<int> worldOption, Option<bool> specificReadPosition)
@@ -101,7 +116,7 @@ namespace MCworldEditor.CommandsProvider
             Command readPosition = new("read", "Reads position of player and displays it") { specificReadPosition };
             readPosition.Aliases.Add("check");
             positionCommand.Subcommands.Add(readPosition);
-            readPosition.SetAction(arguments => _playerCommands.ReadPosition(arguments.GetValue(worldOption), arguments.GetValue(specificReadPosition)));
+            readPosition.SetAction(context => _playerCommands.ReadPosition(context.GetValue(worldOption), context.GetValue(specificReadPosition)));
         }
     }
 }

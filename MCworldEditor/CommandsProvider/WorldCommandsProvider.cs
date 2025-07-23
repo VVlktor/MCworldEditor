@@ -15,9 +15,9 @@ namespace MCworldEditor.CommandsProvider
             _worldCommands = worldCommands;
         }
 
-        public void Register(Command rootCommand, Option<int> worldOption)//dodac komende na podejrzenie seeda, 
+        public void Register(Command rootCommand, Option<int> worldOption)//dodac komende na sprawdzenie godziny w swiecie (Time % 24000), komenda na sprawdzenie czasu spedzonego w swiecie (realne godziny)
         {
-            Command worldCommand = new("chunk", "Allows to operate on chunks");
+            Command worldCommand = new("map", "Allows to manipulate and read map data");
 
             rootCommand.Subcommands.Add(worldCommand);
 
@@ -35,6 +35,33 @@ namespace MCworldEditor.CommandsProvider
 
             RegisterSearchForBlockCommand(worldCommand, worldOption, xOption, zOption);
             RegisterChunkDimendionsCommand(worldCommand, xOption, zOption);
+            RegisterSeedCommand(worldCommand, worldOption);
+        }
+
+        private void RegisterSeedCommand(Command worldCommand, Option<int> worldOption)
+        {
+            Command seedCommand = new("seed", "Operations related to seed value of the world.");
+            worldCommand.Subcommands.Add(seedCommand);
+            RegisterSetSeedCommand(seedCommand, worldOption);
+            RegisterReadSeedCommand(seedCommand, worldOption);
+        }
+
+        private void RegisterReadSeedCommand(Command seedCommand, Option<int> worldOption)
+        {
+            Command readSeedCommand = new("read","Displays value of seed.");
+            seedCommand.Subcommands.Add(readSeedCommand);
+            readSeedCommand.SetAction(context => _worldCommands.ReadSeed(context.GetValue(worldOption)));
+        }
+
+        private void RegisterSetSeedCommand(Command seedCommand, Option<int> worldOption)
+        {
+            Argument<long> setSeedArgument = new("seedId")
+            {
+                Description = "ID of new seed"
+            };
+            Command setSeedCommand = new("set", "Sets value of seed. Keep in mind this cannot be reversed and generation of chunks might be bugged.") { setSeedArgument };
+            seedCommand.Subcommands.Add(setSeedCommand);
+            setSeedCommand.SetAction(context => _worldCommands.SetSeed(context.GetValue(worldOption), context.GetValue(setSeedArgument)));
         }
 
         private void RegisterSearchForBlockCommand(Command worldCommand, Option<int> worldOption, Option<int?> xOption, Option<int?> zOption)
@@ -44,7 +71,7 @@ namespace MCworldEditor.CommandsProvider
                 Description = "ID of the block to search for."
             };
             Command searchForBlockCommand = new("count", "Searches for block with specified id on chunk with provided coordinates") { searchForBlockIdArgument, xOption, zOption };
-            searchForBlockCommand.SetAction(arguments => _worldCommands.CountBlocksOnChunk(arguments.GetValue(worldOption), arguments.GetValue(searchForBlockIdArgument), arguments.GetValue(xOption), arguments.GetValue(zOption)));
+            searchForBlockCommand.SetAction(context => _worldCommands.CountBlocksOnChunk(context.GetValue(worldOption), context.GetValue(searchForBlockIdArgument), context.GetValue(xOption), context.GetValue(zOption)));
             worldCommand.Subcommands.Add(searchForBlockCommand);
         }
 
@@ -52,7 +79,7 @@ namespace MCworldEditor.CommandsProvider
         {
             Command chunkDimensionsCommand = new("dimensions", "Displays the X, Y, Z coordinates of the chunk corners for the given position.") { xOption, zOption };
             chunkDimensionsCommand.Aliases.Add("corners");
-            chunkDimensionsCommand.SetAction(arguments => _worldCommands.ChunkDimensions(arguments.GetValue(xOption), arguments.GetValue(zOption)));
+            chunkDimensionsCommand.SetAction(context => _worldCommands.ChunkDimensions(context.GetValue(xOption), context.GetValue(zOption)));
             worldCommand.Subcommands.Add(chunkDimensionsCommand);
         }
     }
