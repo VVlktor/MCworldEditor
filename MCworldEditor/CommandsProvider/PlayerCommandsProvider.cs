@@ -13,7 +13,7 @@ namespace MCworldEditor.CommandsProvider
             _datHelper = datHelper;
             _playerCommands = playerCommands;
         }
-        //komende na falldistance, komende na uratowanie - ustawienie hp na max, sprawdzenie czy nie jest w lawie, usuniecie potworow dookola etc.
+        
         public void Register(RootCommand rootCommand, Option<int> worldOption)
         {
             Command playerCommand = new("player", "Commands realted to player.");
@@ -40,6 +40,14 @@ namespace MCworldEditor.CommandsProvider
             RegisterPositionCommands(playerCommand, worldOption, xPositionArgument, yPositionArgument, zPositionArgument, safeNewPosition);
             RegisterSpawnCommands(playerCommand, worldOption, xPositionArgument, yPositionArgument, zPositionArgument, safeNewPosition);
             RegisterHealthCommand(playerCommand, worldOption);
+            RegisterSaveCommand(playerCommand, worldOption);
+        }
+
+        private void RegisterSaveCommand(Command playerCommand, Option<int> worldOption)
+        {
+            Command saveCommand = new("save", "Saves player: adds hp, extinguishes fire, negates fall damage, removes lava etc. Note: won't take effect if player is already dead.");
+            playerCommand.Subcommands.Add(saveCommand);
+            saveCommand.SetAction(context => _playerCommands.SaveFromDying(context.GetValue(worldOption)));
         }
 
         private void RegisterHealthCommand(Command playerCommand, Option<int> worldOption)
@@ -56,7 +64,7 @@ namespace MCworldEditor.CommandsProvider
             {
                 Description = "Number of hp to set (1 = half hp)"
             };
-            Command setHealth = new("set", "Sets hp of player.") { worldOption, hpCount };
+            Command setHealth = new("set", "Sets hp of player.") { hpCount };
             healthCommand.Subcommands.Add(setHealth);
 
             setHealth.SetAction(context => _playerCommands.SetHealth(context.GetValue(worldOption), context.GetValue(hpCount)));

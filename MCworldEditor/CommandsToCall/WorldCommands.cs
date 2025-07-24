@@ -1,6 +1,5 @@
 ﻿using fNbt;
 using System.IO;
-using System.Text;
 
 namespace MCworldEditor.CommandsToCall
 {
@@ -12,16 +11,11 @@ namespace MCworldEditor.CommandsToCall
         {
             _datHelper = datHelper;
         }
-        
+
         public int SetSeed(int worldId, long seed)
         {
-            NbtFile nbtFile = new NbtFile();
-            string path = Path.Combine(@"C:\Users\Admin\AppData\Roaming\.minecraft\saves\World" + worldId, "level.dat");
-
-            using (FileStream stream = File.OpenRead(path))
-            {
-                nbtFile.LoadFromStream(stream, NbtCompression.AutoDetect);
-            }
+            string path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), ".minecraft", "saves", $"World{worldId}", "level.dat");
+            NbtFile nbtFile = _datHelper.ReadDatFile(path);
             var seedTag = nbtFile.RootTag.Get<NbtCompound>("Data")!.Get<NbtLong>("RandomSeed");
             seedTag!.Value = seed;
             nbtFile.SaveToFile(path, NbtCompression.GZip);
@@ -30,13 +24,8 @@ namespace MCworldEditor.CommandsToCall
 
         public int ReadSeed(int worldId)
         {
-            NbtFile nbtFile = new NbtFile();
-            string path = Path.Combine(@"C:\Users\Admin\AppData\Roaming\.minecraft\saves\World" + worldId, "level.dat");
-
-            using (FileStream stream = File.OpenRead(path))
-            {
-                nbtFile.LoadFromStream(stream, NbtCompression.AutoDetect);
-            }
+            string path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), ".minecraft", "saves", $"World{worldId}", "level.dat");
+            NbtFile nbtFile = _datHelper.ReadDatFile(path);
             var seedTag = nbtFile.RootTag.Get<NbtCompound>("Data")!.Get<NbtLong>("RandomSeed");
             Console.WriteLine($"Seed: {seedTag!.Value}");
             return 0;
@@ -71,11 +60,7 @@ namespace MCworldEditor.CommandsToCall
                 return 1;
             }
 
-            NbtFile nbtFile = new NbtFile(chunkPath);
-            using (FileStream stream = File.OpenRead(chunkPath))
-            {
-                nbtFile.LoadFromStream(stream, NbtCompression.AutoDetect);
-            }
+            NbtFile nbtFile = _datHelper.ReadDatFile(chunkPath);
             var levelTag = nbtFile.RootTag.Get<NbtCompound>("Level");
             var blocks = levelTag!.Get<NbtByteArray>("Blocks")!.Value;
             int blockCount = blocks.Count(b => b == blockId);

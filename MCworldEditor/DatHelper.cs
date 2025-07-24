@@ -5,6 +5,16 @@ namespace MCworldEditor
 {
     public class DatHelper
     {
+        public NbtFile ReadDatFile(string path)
+        {
+            NbtFile nbtFile = new NbtFile();
+            using (FileStream stream = File.OpenRead(path))
+            {
+                nbtFile.LoadFromStream(stream, NbtCompression.AutoDetect);
+            }
+            return nbtFile;
+        }
+
         public (int X, int Y, int Z) GetPlayerPositionInt(int worldId)
         {
             NbtFile nbtLevelFile = new NbtFile();
@@ -49,7 +59,7 @@ namespace MCworldEditor
             return blocks[block] != 0;
         }
 
-        private int FindByteInChunkByCoords(int x, int y, int z)
+        public int FindByteInChunkByCoords(int x, int y, int z)
         {
             int whichByte = 0;
             var firstChunkCoords = FindFirstBlockOfChunkByCoords(x, y, z);

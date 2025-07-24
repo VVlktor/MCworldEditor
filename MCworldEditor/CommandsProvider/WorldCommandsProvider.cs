@@ -1,5 +1,4 @@
 ﻿using MCworldEditor.CommandsToCall;
-using Microsoft.VisualBasic.FileIO;
 using System.CommandLine;
 
 namespace MCworldEditor.CommandsProvider
@@ -48,7 +47,7 @@ namespace MCworldEditor.CommandsProvider
 
         private void RegisterReadSeedCommand(Command seedCommand, Option<int> worldOption)
         {
-            Command readSeedCommand = new("read","Displays value of seed.");
+            Command readSeedCommand = new("read", "Displays value of seed.");
             seedCommand.Subcommands.Add(readSeedCommand);
             readSeedCommand.SetAction(context => _worldCommands.ReadSeed(context.GetValue(worldOption)));
         }

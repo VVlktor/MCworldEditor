@@ -1,7 +1,4 @@
 ﻿using fNbt;
-using System.CommandLine;
-using System.Drawing;
-using System.IO;
 
 namespace MCworldEditor.CommandsToCall
 {
@@ -13,16 +10,47 @@ namespace MCworldEditor.CommandsToCall
         {
             _datHelper = datHelper;
         }
+        //komende na falldistance, komende na uratowanie - ustawienie hp na max, sprawdzenie czy nie jest w lawie, usuniecie potworow dookola etc.
+        public int SaveFromDying(int worldId)
+        {
+            string path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), ".minecraft", "saves", $"World{worldId}", "level.dat");
+            
+           
+
+            SetHealth(worldId, 100);
+
+            var positionInt = _datHelper.GetPlayerPositionInt(worldId);
+
+            string chunkPath = _datHelper.GetChunkPathByCoordinates(worldId, positionInt.X, positionInt.Y, positionInt.Z);
+
+            int blockByte = _datHelper.FindByteInChunkByCoords(positionInt.X, positionInt.Y, positionInt.Z);
+
+            NbtFile nbtChunkFile = _datHelper.ReadDatFile(chunkPath);
+            var levelTag = nbtChunkFile.RootTag.Get<NbtCompound>("Level");
+            var blocks = levelTag!.Get<NbtByteArray>("Blocks")!.Value;
+            int oile = 0;
+            while (blocks[blockByte]!=0)
+            {
+                blockByte++;//TODO - wiadomo
+                oile++;
+            }
+            SetPlayerPosition(worldId, positionInt.X, positionInt.Y + oile + 2, positionInt.Z, false);
+            blocks[blockByte] = 1;//TODO kontynuowac
+
+            //var fallDistance = nbtFile.RootTag.Get<NbtCompound>("Player")!.Get<NbtFloat>("FallDistance");
+           // if (fallDistance.Value > 0)
+            //{
+                //zmienic na 0 i ustawic blok pod graczem
+           // }
+
+            nbtChunkFile.SaveToFile(chunkPath, NbtCompression.GZip);
+            return 0;
+        }
 
         public int SetHealth(int worldId, short hp)
         {
-            NbtFile nbtFile = new NbtFile();
-
-            string path = Path.Combine(@"C:\Users\Admin\AppData\Roaming\.minecraft\saves\World" + worldId, "level.dat");
-            using (FileStream stream = File.OpenRead(path))
-            {
-                nbtFile.LoadFromStream(stream, NbtCompression.AutoDetect);
-            }
+            string path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), ".minecraft", "saves", $"World{worldId}", "level.dat");
+            NbtFile nbtFile = _datHelper.ReadDatFile(path);
             var healthTag = nbtFile.RootTag.Get<NbtCompound>("Data")!.Get<NbtCompound>("Player")!.Get<NbtShort>("Health");
             healthTag!.Value = hp;
 
@@ -32,21 +60,17 @@ namespace MCworldEditor.CommandsToCall
 
         public int SetSpawnPoint(int worldId, int x, int y, int z, bool safe)
         {
-            NbtFile nbtFile = new NbtFile();
-            string path = Path.Combine(@"C:\Users\Admin\AppData\Roaming\.minecraft\saves\World" + worldId, "level.dat");
-            using (FileStream stream = File.OpenRead(path))
-            {
-                nbtFile.LoadFromStream(stream, NbtCompression.AutoDetect);
-            }
+            string path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), ".minecraft", "saves", $"World{worldId}", "level.dat");
+            NbtFile nbtFile = _datHelper.ReadDatFile(path);
 
             var dataTag = nbtFile.RootTag.Get<NbtCompound>("Data");
-            if (safe && (_datHelper.CheckIfBlock(worldId, x, y+1, z) || _datHelper.CheckIfBlock(worldId, x, y + 2, z) || y > 126))//poprawic zeby CheckIfBlock nie robil exception przy y>128 (jak dam y=200000 to wywala byte)
+            if (safe && (_datHelper.CheckIfBlock(worldId, x, y + 1, z) || _datHelper.CheckIfBlock(worldId, x, y + 2, z) || y > 126))//poprawic zeby CheckIfBlock nie robil exception przy y>128 (jak dam y=200000 to wywala byte)
             {
                 Console.WriteLine("Unable to safely change the spawnpoint.");
                 return 1;
             }
-            dataTag!.Get<NbtInt>("SpawnX")!.Value = x; 
-            dataTag!.Get<NbtInt>("SpawnY")!.Value = y; 
+            dataTag!.Get<NbtInt>("SpawnX")!.Value = x;
+            dataTag!.Get<NbtInt>("SpawnY")!.Value = y;
             dataTag!.Get<NbtInt>("SpawnZ")!.Value = z;
 
             nbtFile.SaveToFile(path, NbtCompression.GZip);
@@ -66,23 +90,19 @@ namespace MCworldEditor.CommandsToCall
 
         public int SetPlayerPosition(int worldId, int x, int y, int z, bool safe)
         {
-            NbtFile nbtFile = new NbtFile();
-            string path = Path.Combine(@"C:\Users\Admin\AppData\Roaming\.minecraft\saves\World" + worldId, "level.dat");
-            using (FileStream stream = File.OpenRead(path))
-            {
-                nbtFile.LoadFromStream(stream, NbtCompression.AutoDetect);
-            }
+            string path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), ".minecraft", "saves", $"World{worldId}", "level.dat");
+            NbtFile nbtFile = _datHelper.ReadDatFile(path);
 
             var posTag = nbtFile.RootTag.Get<NbtCompound>("Data")!.Get<NbtCompound>("Player")!.Get<NbtList>("Pos");
             posTag!.Clear();
-            if(safe && (_datHelper.CheckIfBlock(worldId, x, y, z) || y<1 || _datHelper.CheckIfBlock(worldId, x, y-1, z)))
+            if (safe && (_datHelper.CheckIfBlock(worldId, x, y, z) || y < 1 || _datHelper.CheckIfBlock(worldId, x, y - 1, z)))
             {
                 Console.WriteLine("Unable to safely change the player's position.");
                 return 1;
             }
-            posTag.Add(new NbtDouble() { Value = x + (x>=0 ? 0.5 : -0.5) });
+            posTag.Add(new NbtDouble() { Value = x + (x >= 0 ? 0.5 : -0.5) });
             posTag.Add(new NbtDouble() { Value = y + 0.7 });
-            posTag.Add(new NbtDouble() { Value = z + (z>=0 ? 0.5 : -0.5) });
+            posTag.Add(new NbtDouble() { Value = z + (z >= 0 ? 0.5 : -0.5) });
 
             nbtFile.SaveToFile(path, NbtCompression.GZip);
             return 0;
@@ -90,12 +110,8 @@ namespace MCworldEditor.CommandsToCall
 
         public int ReadSpawn(int worldId)
         {
-            NbtFile nbtFile = new NbtFile();
-            string path = Path.Combine(@"C:\Users\Admin\AppData\Roaming\.minecraft\saves\World" + worldId, "level.dat");
-            using (FileStream stream = File.OpenRead(path))
-            {
-                nbtFile.LoadFromStream(stream, NbtCompression.AutoDetect);
-            }
+            string path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), ".minecraft", "saves", $"World{worldId}", "level.dat");
+            NbtFile nbtFile = _datHelper.ReadDatFile(path);
             var dataTag = nbtFile.RootTag.Get<NbtCompound>("Data");
             var xSpawn = dataTag!.Get<NbtInt>("SpawnX")!.IntValue;
             var ySpawn = dataTag!.Get<NbtInt>("SpawnY")!.IntValue;

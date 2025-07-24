@@ -14,12 +14,7 @@ namespace MCworldEditor.CommandsToCall
         public int AddItemToInventory(int worldNumber, int itemId, int count)//TODO: dodac petle zeby mozna bylo dodawac wiecej niz 127 itemow na raz
         {
             string path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), ".minecraft", "saves", $"World{worldNumber}", "level.dat");
-            
-            NbtFile nbtFile = new NbtFile();
-            using (FileStream stream = File.OpenRead(path))
-            {
-                nbtFile.LoadFromStream(stream, NbtCompression.AutoDetect);
-            }
+            NbtFile nbtFile = _datHelper.ReadDatFile(path);
 
             var allTags = nbtFile.RootTag.Names.ToList();
             var dataTag = nbtFile.RootTag.Get<NbtCompound>("Data");
@@ -64,13 +59,7 @@ namespace MCworldEditor.CommandsToCall
         public int ClearInventory(int worldNumber)
         {
             string path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), ".minecraft", "saves", $"World{worldNumber}", "level.dat");
-
-            NbtFile nbtFile = new NbtFile();
-
-            using (FileStream stream = File.OpenRead(path))
-            {
-                nbtFile.LoadFromStream(stream, NbtCompression.AutoDetect);
-            }
+            NbtFile nbtFile = _datHelper.ReadDatFile(path);
 
             var allTags = nbtFile.RootTag.Names.ToList();
             var dataTag = nbtFile.RootTag.Get<NbtCompound>("Data");
