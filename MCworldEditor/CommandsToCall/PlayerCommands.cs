@@ -64,7 +64,12 @@ namespace MCworldEditor.CommandsToCall
             NbtFile nbtFile = _datHelper.ReadDatFile(path);
 
             var dataTag = nbtFile.RootTag.Get<NbtCompound>("Data");
-            if (safe && (_datHelper.CheckIfBlock(worldId, x, y + 1, z) || _datHelper.CheckIfBlock(worldId, x, y + 2, z) || y > 126))//poprawic zeby CheckIfBlock nie robil exception przy y>128 (jak dam y=200000 to wywala byte)
+            if(safe && y > 126)
+            {
+                Console.WriteLine("Unable to safely change the spawnpoint.");
+                return 1;
+            }
+            if (safe && (_datHelper.CheckIfBlock(worldId, x, y + 1, z) || _datHelper.CheckIfBlock(worldId, x, y + 2, z)))//poprawic zeby CheckIfBlock nie robil exception przy y>128 (jak dam y=200000 to wywala byte) - niby poprawione, trzeba potestować
             {
                 Console.WriteLine("Unable to safely change the spawnpoint.");
                 return 1;

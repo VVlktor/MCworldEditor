@@ -12,6 +12,21 @@ namespace MCworldEditor.CommandsToCall
             _datHelper = datHelper;
         }
 
+        public int ReadTime(int worldId, bool isRaw)
+        {
+            string path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), ".minecraft", "saves", $"World{worldId}", "level.dat");
+            NbtFile nbtFile = _datHelper.ReadDatFile(path);
+            var timeTag = nbtFile.RootTag.Get<NbtCompound>("Data")!.Get<NbtLong>("Time")!.Value;
+            if (isRaw)
+            {
+                Console.WriteLine(timeTag);
+                return 0;
+            }
+            var totalTime = TimeSpan.FromSeconds(timeTag/20);
+            Console.WriteLine($"{Math.Floor(totalTime.TotalHours)}:{totalTime.Minutes}:{totalTime.Seconds}");
+            return 0;
+        }
+
         public int SetSeed(int worldId, long seed)
         {
             string path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), ".minecraft", "saves", $"World{worldId}", "level.dat");
@@ -31,8 +46,14 @@ namespace MCworldEditor.CommandsToCall
             return 0;
         }
 
-        public int ChunkDimensions(int? x, int? z)//TODO: pobierac pozycje gracza jesli nie podano x lub z
+        public int ChunkDimensions(int worldId, int? x, int? z)
         {
+            if(x is null || z is null)
+            {
+                var playerPosition = _datHelper.GetPlayerPositionInt(worldId);
+                x = x is null ? playerPosition.X : x;
+                z = z is null ? playerPosition.Z : z;
+            }
             int searched = x < 0 ? -15 : 0;
             while (x % 16 != searched)
                 x--;

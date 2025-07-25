@@ -17,12 +17,8 @@ namespace MCworldEditor
 
         public (int X, int Y, int Z) GetPlayerPositionInt(int worldId)
         {
-            NbtFile nbtLevelFile = new NbtFile();
-            string path = Path.Combine(@"C:\Users\Admin\AppData\Roaming\.minecraft\saves\World" + worldId, "level.dat");
-            using (FileStream stream = File.OpenRead(path))
-            {
-                nbtLevelFile.LoadFromStream(stream, NbtCompression.AutoDetect);
-            }
+            string path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), ".minecraft", "saves", $"World{worldId}", "level.dat");
+            NbtFile nbtLevelFile = ReadDatFile(path);
             var dataTag = nbtLevelFile.RootTag.Get<NbtCompound>("Data");
             var playerTag = dataTag!.Get<NbtCompound>("Player");
             var positionTag = playerTag!.Get<NbtList>("Pos");
@@ -32,12 +28,8 @@ namespace MCworldEditor
 
         public (double X, double Y, double Z) GetPlayerPositionDouble(int worldId)
         {
-            NbtFile nbtLevelFile = new NbtFile();
-            string path = Path.Combine(@"C:\Users\Admin\AppData\Roaming\.minecraft\saves\World" + worldId, "level.dat");
-            using (FileStream stream = File.OpenRead(path))
-            {
-                nbtLevelFile.LoadFromStream(stream, NbtCompression.AutoDetect);
-            }
+            string path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), ".minecraft", "saves", $"World{worldId}", "level.dat");
+            NbtFile nbtLevelFile = ReadDatFile(path);
             var dataTag = nbtLevelFile.RootTag.Get<NbtCompound>("Data");
             var playerTag = dataTag!.Get<NbtCompound>("Player");
             var positionTag = playerTag!.Get<NbtList>("Pos");
@@ -49,11 +41,7 @@ namespace MCworldEditor
         {
             string path = GetChunkPathByCoordinates(worldId, x, y, z);
             int block = FindByteInChunkByCoords(x, y, z);
-            NbtFile nbtFile = new NbtFile(path);
-            using (FileStream stream = File.OpenRead(path))
-            {
-                nbtFile.LoadFromStream(stream, NbtCompression.AutoDetect);
-            }
+            NbtFile nbtFile = ReadDatFile(path);
             var levelTag = nbtFile.RootTag.Get<NbtCompound>("Level");
             var blocks = levelTag!.Get<NbtByteArray>("Blocks")!.Value;
             return blocks[block] != 0;
@@ -100,7 +88,8 @@ namespace MCworldEditor
             string signed36Z = ToSignedBase36(chunkZ);
             string f1 = ToBase36(chunkX);
             string f2 = ToBase36(chunkZ);
-            string path = Path.Combine(@"C:\Users\Admin\AppData\Roaming\.minecraft\saves\World" + worldNumber, f1, f2, $"c.{signed36X}.{signed36Z}.dat");
+            string path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), ".minecraft", "saves", $"World{worldNumber}", f1, f2, $"c.{signed36X}.{signed36Z}.dat");
+            //string path = Path.Combine(@"C:\Users\Admin\AppData\Roaming\.minecraft\saves\World" + worldNumber, f1, f2, $"c.{signed36X}.{signed36Z}.dat");
             return path;
         }
 

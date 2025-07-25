@@ -14,7 +14,7 @@ namespace MCworldEditor.CommandsProvider
             _worldCommands = worldCommands;
         }
 
-        public void Register(Command rootCommand, Option<int> worldOption)//dodac komende na sprawdzenie godziny w swiecie (Time % 24000), komenda na sprawdzenie czasu spedzonego w swiecie (realne godziny)
+        public void Register(Command rootCommand, Option<int> worldOption)//komenda na ustawienie dnia/nocy
         {
             Command worldCommand = new("map", "Allows to manipulate and read map data");
 
@@ -33,8 +33,27 @@ namespace MCworldEditor.CommandsProvider
             };
 
             RegisterSearchForBlockCommand(worldCommand, worldOption, xOption, zOption);
-            RegisterChunkDimendionsCommand(worldCommand, xOption, zOption);
+            RegisterChunkDimendionsCommand(worldCommand, worldOption, xOption, zOption);
             RegisterSeedCommand(worldCommand, worldOption);
+            RegisterTimeCommand(worldCommand, worldOption);
+        }
+
+        private void RegisterTimeCommand(Command worldCommand, Option<int> worldOption)
+        {
+            Command timeCommand = new("time", "Commands ");
+            worldCommand.Subcommands.Add(timeCommand);
+            RegisterReadTimeCommand(timeCommand, worldOption);
+        }
+
+        private void RegisterReadTimeCommand(Command timeCommand, Option<int> worldOption)
+        {
+            Option<bool> rawTimeOption = new("--raw")
+            {
+                Description = "Displays number of ticks instead of formatted time."
+            };
+            Command readTimeCommand = new("read", "Displays time spent in world (HH:MM:SS).") { rawTimeOption };
+            readTimeCommand.SetAction(context => _worldCommands.ReadTime(context.GetValue(worldOption), context.GetValue(rawTimeOption)));
+            timeCommand.Subcommands.Add(readTimeCommand);
         }
 
         private void RegisterSeedCommand(Command worldCommand, Option<int> worldOption)
@@ -74,11 +93,11 @@ namespace MCworldEditor.CommandsProvider
             worldCommand.Subcommands.Add(searchForBlockCommand);
         }
 
-        private void RegisterChunkDimendionsCommand(Command worldCommand, Option<int?> xOption, Option<int?> zOption)
+        private void RegisterChunkDimendionsCommand(Command worldCommand, Option<int> worldOption, Option<int?> xOption, Option<int?> zOption)
         {
             Command chunkDimensionsCommand = new("dimensions", "Displays the X, Y, Z coordinates of the chunk corners for the given position.") { xOption, zOption };
             chunkDimensionsCommand.Aliases.Add("corners");
-            chunkDimensionsCommand.SetAction(context => _worldCommands.ChunkDimensions(context.GetValue(xOption), context.GetValue(zOption)));
+            chunkDimensionsCommand.SetAction(context => _worldCommands.ChunkDimensions(context.GetValue(worldOption), context.GetValue(xOption), context.GetValue(zOption)));
             worldCommand.Subcommands.Add(chunkDimensionsCommand);
         }
     }
