@@ -1,5 +1,7 @@
 ﻿using MCworldEditor.CommandsProvider;
 using MCworldEditor.CommandsToCall;
+using MCworldEditor.Services;
+using MCworldEditor.Services.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace MCworldEditor
@@ -20,7 +22,10 @@ namespace MCworldEditor
             builder.AddTransient<WorldCommands>();
             builder.AddTransient<WorldCommandsProvider>();
 
-            builder.AddTransient<DatHelper>();
+            builder.AddTransient<IChunkService, ChunkService>();
+            builder.AddTransient<IFileService, FileService>();
+            builder.AddTransient<IPlayerPositionService, PlayerPositionService>();
+            builder.AddTransient<TimeService>();
 
             ServiceProvider services = builder.BuildServiceProvider();
             Commands commands = services.GetRequiredService<Commands>();

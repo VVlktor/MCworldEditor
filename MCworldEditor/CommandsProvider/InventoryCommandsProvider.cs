@@ -1,4 +1,5 @@
 ﻿using MCworldEditor.CommandsToCall;
+using MCworldEditor.Services.Interfaces;
 using System.CommandLine;
 
 namespace MCworldEditor.CommandsProvider
@@ -6,9 +7,9 @@ namespace MCworldEditor.CommandsProvider
     public class InventoryCommandsProvider
     {
         private readonly InventoryCommands _inventoryCommands;
-        private readonly DatHelper _datHelper;
+        private readonly IPlayerPositionService _datHelper;
 
-        public InventoryCommandsProvider(InventoryCommands inventoryCommands, DatHelper datHelper)
+        public InventoryCommandsProvider(InventoryCommands inventoryCommands, IPlayerPositionService datHelper)
         {
             _inventoryCommands = inventoryCommands;
             _datHelper = datHelper;

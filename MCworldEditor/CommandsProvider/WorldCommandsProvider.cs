@@ -1,14 +1,15 @@
 ﻿using MCworldEditor.CommandsToCall;
+using MCworldEditor.Services.Interfaces;
 using System.CommandLine;
 
 namespace MCworldEditor.CommandsProvider
 {
     public class WorldCommandsProvider
     {
-        private DatHelper _datHelper;
+        private IPlayerPositionService _datHelper;
         private WorldCommands _worldCommands;
 
-        public WorldCommandsProvider(DatHelper datHelper, WorldCommands worldCommands)
+        public WorldCommandsProvider(IPlayerPositionService datHelper, WorldCommands worldCommands)
         {
             _datHelper = datHelper;
             _worldCommands = worldCommands;

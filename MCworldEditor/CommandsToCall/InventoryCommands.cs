@@ -1,20 +1,21 @@
 ﻿using fNbt;
+using MCworldEditor.Services.Interfaces;
 
 namespace MCworldEditor.CommandsToCall
 {
     public class InventoryCommands
     {
-        private DatHelper _datHelper;
+        private IFileService _fileService;
 
-        public InventoryCommands(DatHelper datHelper)
+        public InventoryCommands(IFileService fileHelper)
         {
-            _datHelper = datHelper;
+            _fileService = fileHelper;
         }
 
         public int AddItemToInventory(int worldNumber, int itemId, int count)
         {
             string path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), ".minecraft", "saves", $"World{worldNumber}", "level.dat");
-            NbtFile nbtFile = _datHelper.ReadDatFile(path);
+            NbtFile nbtFile = _fileService.ReadDatFile(path);
 
             var allTags = nbtFile.RootTag.Names.ToList();
             var dataTag = nbtFile.RootTag.Get<NbtCompound>("Data");
@@ -67,7 +68,7 @@ namespace MCworldEditor.CommandsToCall
         public int ClearInventory(int worldNumber)
         {
             string path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), ".minecraft", "saves", $"World{worldNumber}", "level.dat");
-            NbtFile nbtFile = _datHelper.ReadDatFile(path);
+            NbtFile nbtFile = _fileService.ReadDatFile(path);
 
             var allTags = nbtFile.RootTag.Names.ToList();
             var dataTag = nbtFile.RootTag.Get<NbtCompound>("Data");
