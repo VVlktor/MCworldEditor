@@ -15,7 +15,7 @@ namespace MCworldEditor.Services
 
         public (int X, int Y, int Z) GetPlayerPositionInt(int worldId)
         {
-            string path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), ".minecraft", "saves", $"World{worldId}", "level.dat");
+            string path = _fileService.GetLevelDatPath(worldId);
             NbtFile nbtLevelFile = _fileService.ReadDatFile(path);
             var dataTag = nbtLevelFile.RootTag.Get<NbtCompound>("Data");
             var playerTag = dataTag!.Get<NbtCompound>("Player");
@@ -26,7 +26,7 @@ namespace MCworldEditor.Services
 
         public (double X, double Y, double Z) GetPlayerPositionDouble(int worldId)
         {
-            string path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), ".minecraft", "saves", $"World{worldId}", "level.dat");
+            string path = _fileService.GetLevelDatPath(worldId); 
             NbtFile nbtLevelFile = _fileService.ReadDatFile(path);
             var dataTag = nbtLevelFile.RootTag.Get<NbtCompound>("Data");
             var playerTag = dataTag!.Get<NbtCompound>("Player");

@@ -22,10 +22,11 @@ namespace MCworldEditor
             builder.AddTransient<WorldCommands>();
             builder.AddTransient<WorldCommandsProvider>();
 
+            builder.AddTransient<ISeedService, SeedService>();
             builder.AddTransient<IChunkService, ChunkService>();
             builder.AddTransient<IFileService, FileService>();
             builder.AddTransient<IPlayerPositionService, PlayerPositionService>();
-            builder.AddTransient<TimeService>();
+            builder.AddTransient<ITimeService, TimeService>();
 
             ServiceProvider services = builder.BuildServiceProvider();
             Commands commands = services.GetRequiredService<Commands>();

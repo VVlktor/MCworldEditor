@@ -3,7 +3,7 @@ using MCworldEditor.Services.Interfaces;
 
 namespace MCworldEditor.Services
 {
-    internal class ChunkService : IChunkService
+    public class ChunkService : IChunkService
     {
         private IFileService _fileService;
 

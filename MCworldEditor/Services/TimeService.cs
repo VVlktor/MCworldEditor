@@ -3,7 +3,7 @@ using MCworldEditor.Services.Interfaces;
 
 namespace MCworldEditor.Services
 {
-    public class TimeService
+    public class TimeService : ITimeService
     {
         private IFileService _fileService;
 

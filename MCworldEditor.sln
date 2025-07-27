@@ -1,9 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.12.35514.174 d17.12
+VisualStudioVersion = 17.12.35514.174
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MCworldEditor", "MCworldEditor\MCworldEditor.csproj", "{2141F1C2-1CC9-4953-9BF6-FBD4AC407CE9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MCworldEditor.Tests", "MCworldEditor.Tests\MCworldEditor.Tests.csproj", "{EC9659B1-95DB-4779-82EE-E15CD7C7FC21}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{2141F1C2-1CC9-4953-9BF6-FBD4AC407CE9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2141F1C2-1CC9-4953-9BF6-FBD4AC407CE9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2141F1C2-1CC9-4953-9BF6-FBD4AC407CE9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EC9659B1-95DB-4779-82EE-E15CD7C7FC21}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EC9659B1-95DB-4779-82EE-E15CD7C7FC21}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EC9659B1-95DB-4779-82EE-E15CD7C7FC21}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EC9659B1-95DB-4779-82EE-E15CD7C7FC21}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

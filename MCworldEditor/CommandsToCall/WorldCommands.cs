@@ -6,13 +6,15 @@ namespace MCworldEditor.CommandsToCall
 {
     public class WorldCommands
     {
-        private IPlayerPositionService _datHelper;
-        private TimeService _timeService;
+        private IPlayerPositionService _playerPositionService;
+        private ITimeService _timeService;
         private IFileService _fileService;
+        private ISeedService _seedService;
 
-        public WorldCommands(IPlayerPositionService datHelper, TimeService timeService, IFileService fileService)
+        public WorldCommands(IPlayerPositionService playerPositionService, ITimeService timeService, IFileService fileService, ISeedService seedService)
         {
-            _datHelper = datHelper;
+            _seedService = seedService;
+            _playerPositionService = playerPositionService;
             _timeService = timeService;
             _fileService = fileService;
         }
@@ -27,28 +29,22 @@ namespace MCworldEditor.CommandsToCall
 
         public int SetSeed(int worldId, long seed)
         {
-            string path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), ".minecraft", "saves", $"World{worldId}", "level.dat");
-            NbtFile nbtFile = _fileService.ReadDatFile(path);
-            var seedTag = nbtFile.RootTag.Get<NbtCompound>("Data")!.Get<NbtLong>("RandomSeed");
-            seedTag!.Value = seed;
-            nbtFile.SaveToFile(path, NbtCompression.GZip);
+            _seedService.SetSeed(worldId, seed);
             return 0;
         }
 
         public int ReadSeed(int worldId)
         {
-            string path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), ".minecraft", "saves", $"World{worldId}", "level.dat");
-            NbtFile nbtFile = _fileService.ReadDatFile(path);
-            var seedTag = nbtFile.RootTag.Get<NbtCompound>("Data")!.Get<NbtLong>("RandomSeed");
-            Console.WriteLine($"Seed: {seedTag!.Value}");
+            long result = _seedService.ReadSeed(worldId);
+            Console.WriteLine($"Seed: {result}");
             return 0;
         }
 
-        public int ChunkDimensions(int worldId, int? x, int? z)
+        public int ChunkDimensions(int worldId, int? x, int? z)//przeniesc do ChunkService
         {
             if (x is null || z is null)
             {
-                var playerPosition = _datHelper.GetPlayerPositionInt(worldId);
+                var playerPosition = _playerPositionService.GetPlayerPositionInt(worldId);
                 x = x is null ? playerPosition.X : x;
                 z = z is null ? playerPosition.Z : z;
             }
@@ -64,9 +60,9 @@ namespace MCworldEditor.CommandsToCall
             return 0;
         }
 
-        public int CountBlocksOnChunk(int worldId, int blockId, int? x, int? z)
+        public int CountBlocksOnChunk(int worldId, int blockId, int? x, int? z)//przeniesc do ChunkService
         {
-            var playerPosition = _datHelper.GetPlayerPositionInt(worldId);
+            var playerPosition = _playerPositionService.GetPlayerPositionInt(worldId);
 
             int X = x is null ? playerPosition.X : (int)x;
             int Z = z is null ? playerPosition.Z : (int)z;
