@@ -2,8 +2,6 @@
 using MCworldEditor.Services;
 using MCworldEditor.Services.Interfaces;
 using Moq;
-using Newtonsoft.Json.Linq;
-using System;
 
 namespace MCworldEditor.Tests
 {
@@ -13,7 +11,7 @@ namespace MCworldEditor.Tests
         public void FindFirstBlockOfChunkByCoords_returnsCoordsOfFirstBlockOnChunk()
         {
             var fileServiceMock = new Mock<IFileService>();
-            var service = new ChunkService(fileServiceMock.Object);
+            var service = new ChunkService(fileServiceMock.Object, new PlayerPositionService(new FileService()));
             var result = service.FindFirstBlockOfChunkByCoords(115, 5, -19);
             Assert.Equal(112, result.x);
             Assert.Equal(0, result.y);
@@ -24,7 +22,7 @@ namespace MCworldEditor.Tests
         public void FindByteInChunkByCoords_returnCorrectByte()
         {
             var fileServiceMock = new Mock<IFileService>();
-            var service = new ChunkService(fileServiceMock.Object);
+            var service = new ChunkService(fileServiceMock.Object, new PlayerPositionService(new FileService()));
             var result = service.FindByteInChunkByCoords(21, 65, -43);
             Assert.Equal(10817, result);
         }
@@ -52,7 +50,7 @@ namespace MCworldEditor.Tests
             fileServiceMock.Setup(d => d.GetChunkPathByCoordinates(worldId, x, y, z)).Returns(fakePath);
             fileServiceMock.Setup(f => f.ReadDatFile(fakePath)).Returns(nbtFile);
 
-            var chunkService = new ChunkService(fileServiceMock.Object);
+            var chunkService = new ChunkService(fileServiceMock.Object, new PlayerPositionService(new FileService()));
             var result = chunkService.CheckIfBlock(worldId, x, y, z);
             Assert.True(result);
         }
@@ -80,7 +78,7 @@ namespace MCworldEditor.Tests
             fileServiceMock.Setup(d => d.GetChunkPathByCoordinates(worldId, x, y, z)).Returns(fakePath);
             fileServiceMock.Setup(f => f.ReadDatFile(fakePath)).Returns(nbtFile);
 
-            var chunkService = new ChunkService(fileServiceMock.Object);
+            var chunkService = new ChunkService(fileServiceMock.Object, new PlayerPositionService(new FileService()));
             var result = chunkService.CheckIfBlock(worldId, x, y, z);
             Assert.False(result);
         }

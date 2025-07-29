@@ -34,5 +34,29 @@ namespace MCworldEditor.Services
 
             return (positionTag![0].DoubleValue, positionTag![1].DoubleValue, positionTag![2].DoubleValue);
         }
+
+        public (int x, int y, int z) GetValidCoords(int worldId, int? x, int? z)
+        {
+            var playerPosition = GetPlayerPositionInt(worldId);
+            x = x is null ? playerPosition.X : x;
+            z = z is null ? playerPosition.Z : z;
+            return ((int)x, 0, (int)z);
+        }
+
+        public int SetPlayerPosition(int worldId, int x, int y, int z)
+        {
+            string path = _fileService.GetLevelDatPath(worldId);
+            NbtFile nbtFile = _fileService.ReadDatFile(path);
+
+            var posTag = nbtFile.RootTag.Get<NbtCompound>("Data")!.Get<NbtCompound>("Player")!.Get<NbtList>("Pos");
+            posTag!.Clear();
+            
+            posTag.Add(new NbtDouble() { Value = x + (x >= 0 ? 0.5 : -0.5) });
+            posTag.Add(new NbtDouble() { Value = y + 0.7 });
+            posTag.Add(new NbtDouble() { Value = z + (z >= 0 ? 0.5 : -0.5) });
+
+            nbtFile.SaveToFile(path, NbtCompression.GZip);
+            return 0;
+        }
     }
 }

@@ -6,9 +6,11 @@ namespace MCworldEditor.Services
     public class ChunkService : IChunkService
     {
         private IFileService _fileService;
+        private IPlayerPositionService _playerPositionService;
 
-        public ChunkService(IFileService fileService)
+        public ChunkService(IFileService fileService, IPlayerPositionService playerPositionService)
         {
+            _playerPositionService = playerPositionService;
             _fileService = fileService;
         }
 
@@ -36,22 +38,41 @@ namespace MCworldEditor.Services
 
         public (int x, int y, int z) FindFirstBlockOfChunkByCoords(int x, int y, int z)
         {
-            if (x < 0)
-                while (x % 16 != -15)
-                    x--;
-            else
-                while (x % 16 != 0)
-                    x--;
+            int searched = x < 0 ? -15 : 0;
+            while (x % 16 != searched)
+                x--;
+
+            searched = z < 0 ? -15 : 0;
+            while (z % 16 != searched)
+                z--;
+
+            //if (x < 0)
+            //    while (x % 16 != -15)
+            //        x--;
+            //else
+            //    while (x % 16 != 0)
+            //        x--;
 
 
-            if (z < 0)
-                while (z % 16 != -15)
-                    z--;
-            else
-                while (z % 16 != 0)
-                    z--;
+            //if (z < 0)
+            //    while (z % 16 != -15)
+            //        z--;
+            //else
+            //    while (z % 16 != 0)
+            //        z--;
 
             return (x, 0, z);
+        }
+
+        public int CountBlocksOnChunk(int worldId, int blockId, int? x, int? z)
+        {
+            var validCoords = _playerPositionService.GetValidCoords(worldId, x, z);
+            string chunkPath = _fileService.GetChunkPathByCoordinates(worldId, validCoords.x, validCoords.y, validCoords.z);
+            NbtFile nbtFile = _fileService.ReadDatFile(chunkPath);
+            var levelTag = nbtFile.RootTag.Get<NbtCompound>("Level");
+            var blocks = levelTag!.Get<NbtByteArray>("Blocks")!.Value;
+            int blockCount = blocks.Count(b => b == blockId);
+            return blockCount;
         }
     }
 }

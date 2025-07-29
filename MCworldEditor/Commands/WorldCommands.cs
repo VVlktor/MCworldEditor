@@ -1,6 +1,4 @@
-﻿using fNbt;
-using MCworldEditor.Services;
-using MCworldEditor.Services.Interfaces;
+﻿using MCworldEditor.Services.Interfaces;
 
 namespace MCworldEditor.CommandsToCall
 {
@@ -10,13 +8,15 @@ namespace MCworldEditor.CommandsToCall
         private ITimeService _timeService;
         private IFileService _fileService;
         private ISeedService _seedService;
+        private IChunkService _chunkService;
 
-        public WorldCommands(IPlayerPositionService playerPositionService, ITimeService timeService, IFileService fileService, ISeedService seedService)
+        public WorldCommands(IPlayerPositionService playerPositionService, ITimeService timeService, IFileService fileService, ISeedService seedService, IChunkService chunkService)
         {
             _seedService = seedService;
             _playerPositionService = playerPositionService;
             _timeService = timeService;
             _fileService = fileService;
+            _chunkService = chunkService;
         }
 
         public int ReadTime(int worldId, bool isRaw)
@@ -40,33 +40,18 @@ namespace MCworldEditor.CommandsToCall
             return 0;
         }
 
-        public int ChunkDimensions(int worldId, int? x, int? z)//przeniesc do ChunkService
+        public int ChunkDimensions(int worldId, int? x, int? z)
         {
-            if (x is null || z is null)
-            {
-                var playerPosition = _playerPositionService.GetPlayerPositionInt(worldId);
-                x = x is null ? playerPosition.X : x;
-                z = z is null ? playerPosition.Z : z;
-            }
-            int searched = x < 0 ? -15 : 0;
-            while (x % 16 != searched)
-                x--;
-
-            searched = z < 0 ? -15 : 0;
-            while (z % 16 != searched)
-                z--;
-
+            var validCoords = _playerPositionService.GetValidCoords(worldId, x, z);
+            var chunkDimensions = _chunkService.FindFirstBlockOfChunkByCoords(validCoords.x, validCoords.y, validCoords.z);
             Console.WriteLine($"Start:\n\tX: {x}\n\tY: 0\n\tZ: {z}\nEnd:\n\tX: {x + 15}\n\tY: 128\n\tZ: {z + 15}");
             return 0;
         }
 
-        public int CountBlocksOnChunk(int worldId, int blockId, int? x, int? z)//przeniesc do ChunkService
+        public int CountBlocksOnChunk(int worldId, int blockId, int? x, int? z)
         {
-            var playerPosition = _playerPositionService.GetPlayerPositionInt(worldId);
-
-            int X = x is null ? playerPosition.X : (int)x;
-            int Z = z is null ? playerPosition.Z : (int)z;
-            string chunkPath = _fileService.GetChunkPathByCoordinates(worldId, X, 0, Z);
+            var validCoords = _playerPositionService.GetValidCoords(worldId, x, z);
+            var chunkPath = _fileService.GetChunkPathByCoordinates(worldId, validCoords.x, validCoords.y, validCoords.z);
             if (!File.Exists(chunkPath))
             {
                 Console.ForegroundColor = ConsoleColor.Red;
@@ -74,11 +59,7 @@ namespace MCworldEditor.CommandsToCall
                 Console.ResetColor();
                 return 1;
             }
-
-            NbtFile nbtFile = _fileService.ReadDatFile(chunkPath);
-            var levelTag = nbtFile.RootTag.Get<NbtCompound>("Level");
-            var blocks = levelTag!.Get<NbtByteArray>("Blocks")!.Value;
-            int blockCount = blocks.Count(b => b == blockId);
+            int blockCount = _chunkService.CountBlocksOnChunk(worldId, blockId, x, z);
             Console.WriteLine($"Number of blocks with id {blockId}: {blockCount}");
             return 0;
         }

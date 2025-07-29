@@ -85,7 +85,7 @@ namespace MCworldEditor.CommandsProvider
             Command readSpawn = new("read", "Displays coordinates of spawn.");
             spawnCommand.Subcommands.Add(readSpawn);
             readSpawn.Aliases.Add("check");
-            readSpawn.SetAction(context => _playerCommands.ReadSpawn(context.GetValue(worldOption)));
+            readSpawn.SetAction(context => _playerCommands.ReadSpawnPoint(context.GetValue(worldOption)));
         }
 
         private void RegisterChangeSpawnPointCommand(Command spawnCommand, Option<int> worldOption, Argument<int> xPositionArgument, Argument<int> yPositionArgument, Argument<int> zPositionArgument, Option<bool> safeNewPosition)

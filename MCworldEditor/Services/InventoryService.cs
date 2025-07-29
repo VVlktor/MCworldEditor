@@ -1,22 +1,21 @@
 ﻿using fNbt;
 using MCworldEditor.Services.Interfaces;
 
-namespace MCworldEditor.CommandsToCall
+namespace MCworldEditor.Services
 {
-    public class InventoryCommands
+    public class InventoryService : IInventoryService
     {
         private IFileService _fileService;
 
-        public InventoryCommands(IFileService fileHelper)
+        public InventoryService(IFileService fileService)
         {
-            _fileService = fileHelper;
+            _fileService = fileService;
         }
 
-        public int AddItemToInventory(int worldNumber, int itemId, int count)
+        public int AddItemToInventory(int worldId, int itemId, int count)
         {
-            string path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), ".minecraft", "saves", $"World{worldNumber}", "level.dat");
+            string path = _fileService.GetLevelDatPath(worldId);
             NbtFile nbtFile = _fileService.ReadDatFile(path);
-
             var allTags = nbtFile.RootTag.Names.ToList();
             var dataTag = nbtFile.RootTag.Get<NbtCompound>("Data");
             var playerTag = dataTag!.Get<NbtCompound>("Player");
@@ -31,7 +30,7 @@ namespace MCworldEditor.CommandsToCall
             }
 
             List<byte> tab = Enumerable.Range(0, 36).Select(i => (byte)i).ToList();
-            
+
             foreach (NbtCompound x in inventoryData!)
                 tab.Remove(x.Get<NbtByte>("Slot")!.ByteValue);
 
@@ -43,10 +42,10 @@ namespace MCworldEditor.CommandsToCall
                 return 1;
             }
 
-            while(count>0 && tab.Count != 0)
+            while (count > 0 && tab.Count != 0)
             {
                 byte byteCount = count > 64 ? (byte)64 : (byte)count;
-                count-=byteCount;
+                count -= byteCount;
 
                 var newItem = new NbtCompound()
                 {
@@ -59,15 +58,14 @@ namespace MCworldEditor.CommandsToCall
                 tab.Remove(tab[0]);
                 inventoryData.Add(newItem);
             }
-            
-            nbtFile.SaveToFile(path, NbtCompression.GZip);
 
+            nbtFile.SaveToFile(path, NbtCompression.GZip);
             return 0;
         }
 
-        public int ClearInventory(int worldNumber)
+        public int CleanInventory(int worldId)
         {
-            string path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), ".minecraft", "saves", $"World{worldNumber}", "level.dat");
+            string path = _fileService.GetLevelDatPath(worldId);
             NbtFile nbtFile = _fileService.ReadDatFile(path);
 
             var allTags = nbtFile.RootTag.Names.ToList();
@@ -77,7 +75,6 @@ namespace MCworldEditor.CommandsToCall
 
             inventoryData!.Clear();
             nbtFile.SaveToFile(path, NbtCompression.GZip);
-
             return 0;
         }
     }

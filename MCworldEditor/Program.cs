@@ -11,7 +11,7 @@ namespace MCworldEditor
         static int Main(string[] args)
         {
             ServiceCollection builder = new();
-            builder.AddTransient<Commands>();
+            builder.AddTransient<CommandProvider>();
             
             builder.AddTransient<InventoryCommands>();
             builder.AddTransient<InventoryCommandsProvider>();
@@ -27,9 +27,13 @@ namespace MCworldEditor
             builder.AddTransient<IFileService, FileService>();
             builder.AddTransient<IPlayerPositionService, PlayerPositionService>();
             builder.AddTransient<ITimeService, TimeService>();
+            builder.AddTransient<IInventoryService, InventoryService>();
+            builder.AddTransient<ISeedService, SeedService>();
+            builder.AddTransient<ISpawnService, SpawnService>();
+            builder.AddTransient<IHealthService, HealthService>();
 
             ServiceProvider services = builder.BuildServiceProvider();
-            Commands commands = services.GetRequiredService<Commands>();
+            CommandProvider commands = services.GetRequiredService<CommandProvider>();
             return commands.CallCommand(args);
         }
     }

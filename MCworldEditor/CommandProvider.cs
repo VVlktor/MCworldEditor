@@ -3,12 +3,12 @@ using System.CommandLine;
 
 namespace MCworldEditor
 {
-    public class Commands
+    public class CommandProvider
     {
         private RootCommand rootCommand;
         Option<int> worldOption;
 
-        public Commands(InventoryCommandsProvider inventoryCommandsProvider, PlayerCommandsProvider playerCommandsProvider, WorldCommandsProvider worldCommandsProvider)
+        public CommandProvider(InventoryCommandsProvider inventoryCommandsProvider, PlayerCommandsProvider playerCommandsProvider, WorldCommandsProvider worldCommandsProvider)
         {
             rootCommand = new($"CLI for editing Minecraft beta worlds.\nKeep your world in default directory for it to work ( {Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), ".minecraft", "saves")} )");
             worldOption = CreateWorldOption();
@@ -22,7 +22,6 @@ namespace MCworldEditor
         {
             return rootCommand.Parse(args).Invoke();
         }
-
 
         private Option<int> CreateWorldOption()
         {
