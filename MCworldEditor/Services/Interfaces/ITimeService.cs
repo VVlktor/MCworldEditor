@@ -4,5 +4,6 @@
     {
         long ReadTime(int worldId);
         string FormatTime(long time, bool isRaw);
+        int SetTime(int worldId, int tickTime);
     }
 }

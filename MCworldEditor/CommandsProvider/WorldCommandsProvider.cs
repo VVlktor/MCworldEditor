@@ -6,12 +6,10 @@ namespace MCworldEditor.CommandsProvider
 {
     public class WorldCommandsProvider
     {
-        private IPlayerPositionService _datHelper;
         private WorldCommands _worldCommands;
 
-        public WorldCommandsProvider(IPlayerPositionService datHelper, WorldCommands worldCommands)
+        public WorldCommandsProvider(WorldCommands worldCommands)
         {
-            _datHelper = datHelper;
             _worldCommands = worldCommands;
         }
 
@@ -44,6 +42,22 @@ namespace MCworldEditor.CommandsProvider
             Command timeCommand = new("time", "Commands ");
             worldCommand.Subcommands.Add(timeCommand);
             RegisterReadTimeCommand(timeCommand, worldOption);
+            RegisterDayCommand(timeCommand, worldOption);
+            RegisterNightCommand(timeCommand, worldOption);
+        }
+
+        private void RegisterDayCommand(Command timeCommand, Option<int> worldOption)
+        {
+            Command dayCommand = new("day", "Set the time to daytime.");
+            timeCommand.Subcommands.Add(dayCommand);
+            dayCommand.SetAction(context => _worldCommands.SetDay(context.GetValue(worldOption)));
+        }
+
+        private void RegisterNightCommand(Command timeCommand, Option<int> worldOption)
+        {
+            Command nightCommand = new("night", "Set the time to nighttime.");
+            timeCommand.Subcommands.Add(nightCommand);
+            nightCommand.SetAction(context => _worldCommands.SetNight(context.GetValue(worldOption)));
         }
 
         private void RegisterReadTimeCommand(Command timeCommand, Option<int> worldOption)

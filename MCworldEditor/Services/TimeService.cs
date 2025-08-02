@@ -28,5 +28,18 @@ namespace MCworldEditor.Services
             var totalTime = TimeSpan.FromSeconds(time / 20);
             return $"{Math.Floor(totalTime.TotalHours)}:{totalTime.Minutes}:{totalTime.Seconds}";
         }
+
+        public int SetTime(int worldId, int tickTime)
+        {
+            string path = _fileService.GetLevelDatPath(worldId);
+            NbtFile nbtFile = _fileService.ReadDatFile(path);
+            var dataTag = nbtFile.RootTag.Get<NbtCompound>("Data");
+            var xSpawn = dataTag!.Get<NbtLong>("Time");
+            long time = xSpawn!.Value % 24000;
+            xSpawn.Value -= time;
+            xSpawn.Value += tickTime;
+            nbtFile.SaveToFile(path, NbtCompression.GZip);
+            return 0;
+        }
     }
 }

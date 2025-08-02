@@ -22,5 +22,13 @@ namespace MCworldEditor.CommandsToCall
             int response = _inventoryService.CleanInventory(worldNumber);
             return response;
         }
+
+        public int ReadInventory(int worldId)
+        {
+            var inventoryData = _inventoryService.ReadItemsInInventory(worldId);
+            foreach (var item in inventoryData)
+                Console.WriteLine($"Id: {item.id}, Count: {item.count}");
+            return 0;
+        }
     }
 }

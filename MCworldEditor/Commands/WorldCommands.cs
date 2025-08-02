@@ -19,11 +19,23 @@ namespace MCworldEditor.CommandsToCall
             _chunkService = chunkService;
         }
 
+        public int SetDay(int worldId)
+        {
+            int response = _timeService.SetTime(worldId, 0);
+            return response;
+        }
+
+        public int SetNight(int worldId)
+        {
+            int response = _timeService.SetTime(worldId, 13000);
+            return response;
+        }
+
         public int ReadTime(int worldId, bool isRaw)
         {
             var readTimeResult = _timeService.ReadTime(worldId);
             var formattedTime = _timeService.FormatTime(readTimeResult, isRaw);
-            Console.WriteLine(formattedTime);
+            Console.WriteLine($"Time spent in world: {formattedTime}");
             return 0;
         }
 

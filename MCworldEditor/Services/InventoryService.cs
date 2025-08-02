@@ -77,5 +77,30 @@ namespace MCworldEditor.Services
             nbtFile.SaveToFile(path, NbtCompression.GZip);
             return 0;
         }
+
+        public List<(int count, short id)> ReadItemsInInventory(int worldId)
+        {
+            string path = _fileService.GetLevelDatPath(worldId);
+            NbtFile nbtFile = _fileService.ReadDatFile(path);
+
+            var allTags = nbtFile.RootTag.Names.ToList();
+            var dataTag = nbtFile.RootTag.Get<NbtCompound>("Data");
+            var playerTag = dataTag!.Get<NbtCompound>("Player");
+            var inventoryData = playerTag!.Get<NbtList>("Inventory");
+            Dictionary<short, int> itemCounts = new();
+
+            foreach (NbtCompound itemTag in inventoryData!)
+            {
+                short id = itemTag.Get<NbtShort>("id")!.Value;
+                byte count = itemTag.Get<NbtByte>("Count")!.Value;
+
+                if (itemCounts.ContainsKey(id))
+                    itemCounts[id] += count;
+                else
+                    itemCounts[id] = count;
+            }
+
+            return itemCounts.Select(x => (x.Value, x.Key)).ToList();
+        }
     }
 }

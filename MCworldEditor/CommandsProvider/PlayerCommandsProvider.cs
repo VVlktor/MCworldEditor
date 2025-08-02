@@ -6,12 +6,10 @@ namespace MCworldEditor.CommandsProvider
 {
     public class PlayerCommandsProvider
     {
-        private IPlayerPositionService _datHelper;
         private PlayerCommands _playerCommands;
 
-        public PlayerCommandsProvider(IPlayerPositionService datHelper, PlayerCommands playerCommands)
+        public PlayerCommandsProvider(PlayerCommands playerCommands)
         {
-            _datHelper = datHelper;
             _playerCommands = playerCommands;
         }
         

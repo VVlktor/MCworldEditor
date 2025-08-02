@@ -22,11 +22,12 @@ namespace MCworldEditor.CommandsToCall
         //komende na falldistance, komende na uratowanie - ustawienie hp na max, sprawdzenie czy nie jest w lawie, usuniecie potworow dookola etc.
         public int SaveFromDying(int worldId)
         {
-            string path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), ".minecraft", "saves", $"World{worldId}", "level.dat");
-            
-           
+            string path = _fileService.GetLevelDatPath(worldId);
+            NbtFile nbtLevelFile = _fileService.ReadDatFile(path);
+            var healthTag = nbtLevelFile.RootTag.Get<NbtCompound>("Data")!.Get<NbtCompound>("Player")!.Get<NbtShort>("Health");
+            healthTag!.Value = 20;
 
-            SetHealth(worldId, 100);
+            _healthService.SetHealth(worldId, 20);
 
             var positionInt = _playerPositionService.GetPlayerPositionInt(worldId);
 

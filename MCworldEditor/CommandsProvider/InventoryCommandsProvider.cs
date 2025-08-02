@@ -7,20 +7,27 @@ namespace MCworldEditor.CommandsProvider
     public class InventoryCommandsProvider
     {
         private readonly InventoryCommands _inventoryCommands;
-        private readonly IPlayerPositionService _datHelper;
 
-        public InventoryCommandsProvider(InventoryCommands inventoryCommands, IPlayerPositionService datHelper)
+        public InventoryCommandsProvider(InventoryCommands inventoryCommands)
         {
             _inventoryCommands = inventoryCommands;
-            _datHelper = datHelper;
         }
-        //komende na czytanie zawartosci inventory
+
         public void Register(RootCommand rootCommand, Option<int> worldOption)
         {
             Command inventoryCommand = new("inventory", "Handles operations related to player's inventory.");
             rootCommand.Subcommands.Add(inventoryCommand);
             RegisterAddItemCommand(inventoryCommand, worldOption);
             RegisterClearInventoryCommand(inventoryCommand, worldOption);
+            RegisterReadInventoryCommand(inventoryCommand, worldOption);
+        }
+
+        private void RegisterReadInventoryCommand(Command inventoryCommand, Option<int> worldOption)
+        {
+            Command readInventory = new("read", "Lists count and id of every item in inventory");
+            readInventory.Aliases.Add("list");
+            inventoryCommand.Subcommands.Add(readInventory);
+            readInventory.SetAction(context=>_inventoryCommands.ReadInventory(context.GetValue(worldOption)));
         }
 
         private void RegisterAddItemCommand(Command inventoryCommand, Option<int> worldOption)
