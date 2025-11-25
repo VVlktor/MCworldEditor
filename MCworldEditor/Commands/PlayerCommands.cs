@@ -19,16 +19,12 @@ namespace MCworldEditor.CommandsToCall
             _spawnService = spawnService;
             _healthService = healthService;
         }
-        //komende na falldistance, komende na uratowanie - ustawienie hp na max, sprawdzenie czy nie jest w lawie, usuniecie potworow dookola etc.
+        
         public int SaveFromDying(int worldId)
         {
-            string path = _fileService.GetLevelDatPath(worldId);
-            NbtFile nbtLevelFile = _fileService.ReadDatFile(path);
-            var healthTag = nbtLevelFile.RootTag.Get<NbtCompound>("Data")!.Get<NbtCompound>("Player")!.Get<NbtShort>("Health");
-            healthTag!.Value = 20;
-
-            _healthService.SetHealth(worldId, 20);
-
+            string levelPath = _fileService.GetLevelDatPath(worldId);
+            NbtFile nbtLevelFile = _fileService.ReadDatFile(levelPath);
+            
             var positionInt = _playerPositionService.GetPlayerPositionInt(worldId);
 
             string chunkPath = _fileService.GetChunkPathByCoordinates(worldId, positionInt.X, positionInt.Y, positionInt.Z);
@@ -37,22 +33,41 @@ namespace MCworldEditor.CommandsToCall
 
             NbtFile nbtChunkFile = _fileService.ReadDatFile(chunkPath);
             var levelTag = nbtChunkFile.RootTag.Get<NbtCompound>("Level");
+
+            var entities = levelTag!.Get<NbtList>("Entities")!;
+            
+            string[] badMobs = ["Zombie", "Spider", "Creeper", "Skeleton", "Ghast", "Zombified_piglin", "Enderman", "Cave_spider", "Silverfish", "Blaze", "Magma_cube"];
+
+            var listToRemove = entities.OfType<NbtCompound>().Where(x => badMobs.Contains(x.Get<NbtString>("id")!.StringValue)).ToList();
+            foreach(var mob in listToRemove)
+                    entities.Remove(mob);
+            
+            var fallDistance = nbtLevelFile.RootTag.Get<NbtCompound>("Data")!.Get<NbtCompound>("Player")!.Get<NbtFloat>("FallDistance");
+            fallDistance!.Value = 0;
+            nbtLevelFile.SaveToFile(levelPath, NbtCompression.GZip);
+
             var blocks = levelTag!.Get<NbtByteArray>("Blocks")!.Value;
             int oile = 0;
-            while (blocks[blockByte]!=0)
-            {
-                blockByte++;//TODO - wiadomo
-                oile++;
-            }
+
+            if (positionInt.Y > 128)
+                blockByte = _chunkService.FindByteInChunkByCoords(positionInt.X, 127, positionInt.Z);
+            else
+                while (blocks[blockByte] != 0)
+                {
+                    blockByte++;
+                    oile++;
+                    if (blockByte % 128 == 1)
+                    {
+                        blockByte--;
+                        break;
+                    }
+                }
+            
             SetPlayerPosition(worldId, positionInt.X, positionInt.Y + oile + 2, positionInt.Z, false);
-            blocks[blockByte] = 1;//TODO kontynuowac
+            blocks[blockByte] = 1;
 
-            //var fallDistance = nbtFile.RootTag.Get<NbtCompound>("Player")!.Get<NbtFloat>("FallDistance");
-           // if (fallDistance.Value > 0)
-            //{
-                //zmienic na 0 i ustawic blok pod graczem
-           // }
-
+            _healthService.SetHealth(worldId, 20);
+            
             nbtChunkFile.SaveToFile(chunkPath, NbtCompression.GZip);
             return 0;
         }

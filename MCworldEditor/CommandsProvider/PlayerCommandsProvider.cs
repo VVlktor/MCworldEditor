@@ -44,7 +44,7 @@ namespace MCworldEditor.CommandsProvider
 
         private void RegisterSaveCommand(Command playerCommand, Option<int> worldOption)
         {
-            Command saveCommand = new("save", "Saves player: adds hp, extinguishes fire, negates fall damage, removes lava etc. Note: won't take effect if player is already dead.");
+            Command saveCommand = new("save", "Saves player: adds hp, extinguishes fire, negates fall damage, removes lava and mobs. Revives player if dead.");
             playerCommand.Subcommands.Add(saveCommand);
             saveCommand.SetAction(context => _playerCommands.SaveFromDying(context.GetValue(worldOption)));
         }
