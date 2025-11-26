@@ -31,6 +31,7 @@ namespace MCworldEditor
             builder.AddTransient<ISeedService, SeedService>();
             builder.AddTransient<ISpawnService, SpawnService>();
             builder.AddTransient<IHealthService, HealthService>();
+            builder.AddTransient<IMobService, MobService>();
 
             ServiceProvider services = builder.BuildServiceProvider();
             CommandProvider commands = services.GetRequiredService<CommandProvider>();

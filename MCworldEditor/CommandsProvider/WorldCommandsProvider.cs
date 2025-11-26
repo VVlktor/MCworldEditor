@@ -35,11 +35,50 @@ namespace MCworldEditor.CommandsProvider
             RegisterChunkDimendionsCommand(worldCommand, worldOption, xOption, zOption);
             RegisterSeedCommand(worldCommand, worldOption);
             RegisterTimeCommand(worldCommand, worldOption);
+            RegisterMobCommand(worldCommand, worldOption, xOption, zOption);
+        }
+
+        private void RegisterMobCommand(Command worldCommand, Option<int> worldOption, Option<int?> xOption, Option<int?> zOption)
+        {
+            Command mobCommand = new("mob", "Commands related to mobs.");
+            worldCommand.Subcommands.Add(mobCommand);
+            RegisterSpawnMobCommand(mobCommand, worldOption, xOption, zOption);
+        }
+
+        private void RegisterSpawnMobCommand(Command mobCommand, Option<int> worldOption, Option<int?> xOption, Option<int?> zOption)
+        {
+            Option<int?> yOption = new("-y")
+            {
+                Description = "In-world Y coordinates. If not specified player's position will be used.",
+                DefaultValueFactory = a => null
+            };
+
+            Option<int?> hpOption = new("-hp")
+            {
+                Description = "Health points of mob.",
+                DefaultValueFactory = a => 10
+            };
+
+            Argument<string> mobIdArgument = new("mobId")
+            {
+                Description = "Id of mob you want to spawn.In beta versions, mobs id was its name with first letter capitalized.",
+                DefaultValueFactory = a => ""
+            };
+
+            Option<int?> countOption = new("-count")
+            {
+                Description = "Number of mobs you want to spawn."
+            };
+            countOption.Aliases.Add("-amount");
+            
+            Command spawnMobCommand = new("spawn", "Spawns mob with specified id.") { worldOption, mobIdArgument, xOption, zOption, yOption, hpOption, countOption };
+            mobCommand.Subcommands.Add(spawnMobCommand);
+            spawnMobCommand.SetAction(context => _worldCommands.SpawnMob(context.GetValue(worldOption), context.GetValue(mobIdArgument)!, context.GetValue(xOption), context.GetValue(yOption), context.GetValue(zOption), context.GetValue(hpOption), context.GetValue(countOption)));
         }
 
         private void RegisterTimeCommand(Command worldCommand, Option<int> worldOption)
         {
-            Command timeCommand = new("time", "Commands ");
+            Command timeCommand = new("time", "Commands related to in-game time.");
             worldCommand.Subcommands.Add(timeCommand);
             RegisterReadTimeCommand(timeCommand, worldOption);
             RegisterDayCommand(timeCommand, worldOption);

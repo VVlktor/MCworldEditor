@@ -9,14 +9,22 @@ namespace MCworldEditor.CommandsToCall
         private IFileService _fileService;
         private ISeedService _seedService;
         private IChunkService _chunkService;
+        private IMobService _mobService;
 
-        public WorldCommands(IPlayerPositionService playerPositionService, ITimeService timeService, IFileService fileService, ISeedService seedService, IChunkService chunkService)
+        public WorldCommands(IPlayerPositionService playerPositionService, ITimeService timeService, IFileService fileService, ISeedService seedService, IChunkService chunkService, IMobService mobService)
         {
             _seedService = seedService;
             _playerPositionService = playerPositionService;
             _timeService = timeService;
             _fileService = fileService;
             _chunkService = chunkService;
+            _mobService = mobService;
+        }
+
+        public int SpawnMob(int worldOption, string mobIdArgument, int? xOption, int? yOption, int? zOption, int? hp, int? count)
+        {
+            int response = _mobService.SpawnMob(worldOption, mobIdArgument, xOption, yOption, zOption, hp, count);
+            return response;
         }
 
         public int SetDay(int worldId)
