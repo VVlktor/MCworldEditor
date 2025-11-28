@@ -8,17 +8,60 @@ namespace MCworldEditor.Services
         private IPlayerPositionService _playerPositionService;
         private IFileService _fileService;
 
+        private string[] passiveMobs = [ "Sheep", "Cow", "Chicken", "Pig", "Squid" ];
+        private string[] hostileMobs = [ "Creeper", "Skeleton", "Zombie", "Spider", "Giant", "Ghast" ];
+
         public MobService(IPlayerPositionService playerPositionService, IFileService fileService)
         {
             _playerPositionService = playerPositionService;
             _fileService = fileService;
         }
 
+        public int RemoveMobs(int worldOption, bool passive, bool hostile, int? area)
+        {
+            int trueArea = area ?? 0;
+
+            var playerPosition = _playerPositionService.GetPlayerPositionInt(worldOption);
+
+            int offsetX = playerPosition.X - (16 * trueArea), offetZ = playerPosition.Z - (16 * trueArea);
+
+            for(int i = 0; i < trueArea*2+1; i++)
+            {
+                for(int j=0; j < trueArea*2+1; j++)
+                {
+                    string currentPath = _fileService.GetChunkPathByCoordinates(worldOption, offsetX + i * 16, playerPosition.Y, offetZ + j * 16);
+
+                    if (!File.Exists(currentPath)) continue;
+
+                    NbtFile nbtFile = _fileService.ReadDatFile(currentPath);
+
+                    var level = nbtFile.RootTag.Get<NbtCompound>("Level")!;
+                    var entities = level.Get<NbtList>("Entities")!;
+
+                    if (passive)
+                    {
+                        var passiveEntities = entities.OfType<NbtCompound>().Where(x => passiveMobs.Contains(x.Get<NbtString>("id")!.Value)).ToList();
+                        foreach (var entity in passiveEntities)
+                            entities.Remove(entity);
+                    }
+
+                    if (hostile)
+                    {
+                        var hostileEntities = entities.OfType<NbtCompound>().Where(x => hostileMobs.Contains(x.Get<NbtString>("id")!.Value)).ToList();
+                        foreach (var entity in hostileEntities)
+                            entities.Remove(entity);
+                    }
+
+                    nbtFile.SaveToFile(currentPath, NbtCompression.GZip);
+                }
+            }
+
+            return 0;
+        }
+
         public int SpawnMob(int worldOption, string mobId, int? x, int? y, int? z, int? hp, int? count)
         {
-            string[] ids = ["Sheep", "Cow", "Chicken", "Creeper", "Pig", "Skeleton", "Zombie", "Spider", "Giant", "Ghast", "Squid"];
-
-            if (!ids.Contains(mobId)) return 1;
+            if (!passiveMobs.Contains(mobId) && !hostileMobs.Contains(mobId)) return 1;
 
             var playerPosition = _playerPositionService.GetPlayerPositionInt(worldOption);
 

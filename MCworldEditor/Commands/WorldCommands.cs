@@ -21,6 +21,12 @@ namespace MCworldEditor.CommandsToCall
             _mobService = mobService;
         }
 
+        public int RemoveMobs(int worldOption, bool passive, bool hostile, int? area)
+        {
+            int response = _mobService.RemoveMobs(worldOption, passive, hostile, area);
+            return response;
+        }
+
         public int SpawnMob(int worldOption, string mobIdArgument, int? xOption, int? yOption, int? zOption, int? hp, int? count)
         {
             int response = _mobService.SpawnMob(worldOption, mobIdArgument, xOption, yOption, zOption, hp, count);

@@ -1,5 +1,4 @@
 ﻿using MCworldEditor.CommandsToCall;
-using MCworldEditor.Services.Interfaces;
 using System.CommandLine;
 
 namespace MCworldEditor.CommandsProvider
@@ -13,7 +12,7 @@ namespace MCworldEditor.CommandsProvider
             _worldCommands = worldCommands;
         }
 
-        public void Register(Command rootCommand, Option<int> worldOption)//komenda na ustawienie dnia/nocy
+        public void Register(Command rootCommand, Option<int> worldOption)
         {
             Command worldCommand = new("map", "Allows to manipulate and read map data");
 
@@ -43,6 +42,30 @@ namespace MCworldEditor.CommandsProvider
             Command mobCommand = new("mob", "Commands related to mobs.");
             worldCommand.Subcommands.Add(mobCommand);
             RegisterSpawnMobCommand(mobCommand, worldOption, xOption, zOption);
+            RegisterRemoveMobCommand(mobCommand, worldOption);
+        }
+
+        private void RegisterRemoveMobCommand(Command mobCommand, Option<int> worldOption)
+        {
+            Option<bool> hostileOption = new("--hostile")
+            {
+                Description = "If provided, hostile mobs will be removed."
+            };
+
+            Option<bool> passiveOption = new("--passive")
+            {
+                Description = "If provided, passive mobs will be removed."
+            };
+
+            Option<int?> areaOption = new("-area")
+            {
+                Description = "Radius around the player, measured in chunks, from which mobs should be removed. If not specified, mobs are removed only from player's current chunk."
+            };
+
+            Command removeMobCommand = new("remove", "Removes mobs from the chunk player is currently in. If neither [--passive] or [--hostile] is used, no mobs will be removed.") { worldOption, passiveOption, hostileOption, areaOption };
+            mobCommand.Subcommands.Add(removeMobCommand);
+            removeMobCommand.Aliases.Add("vanish");
+            removeMobCommand.SetAction(context => _worldCommands.RemoveMobs(context.GetValue(worldOption), context.GetValue(passiveOption), context.GetValue(hostileOption), context.GetValue(areaOption)));
         }
 
         private void RegisterSpawnMobCommand(Command mobCommand, Option<int> worldOption, Option<int?> xOption, Option<int?> zOption)
