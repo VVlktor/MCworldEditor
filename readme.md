@@ -47,7 +47,7 @@ Command Overview - examples:
 ```
 ### Add 20 items (ID 3 - dirt) to inventory
 ```
---world 1 inventory add 46 --count 20
+--world 1 inventory add 3 --count 20
 ```
 ### Display seed of World 4
 ```
@@ -61,7 +61,7 @@ The tool does not support custom world folders or modern Minecraft formats.
 
 Notes & Limitations:
 All changes are made directly to level.dat and chunk files. Make backups before use (seriously).
-The app relies on internal Minecraft Beta chunk structure — later Minecraft versions will not work.
+The app relies on internal Minecraft Beta chunk structure.
 
 License: 
 This project is provided as-is for educational and personal use.
@@ -88,18 +88,24 @@ Adds an item to player's inventory.
 Clears entire inventory.  
 Alias: `clean`
 
+### `inventory list`
+Lists count and id of every item in inventory.  
+Alias: `read`
+
 ---
 
 ## Player Commands
  
 ### `player position read [--specific]`
-Displays player's current position.
+Displays player's current position.  
+Alias: `check`
 
 - `--specific` / `--exact` – shows precise decimal coordinates instead of rounded ones
 
 
 ### `player position set <x> <y> <z> [--safe]`
-Moves player to a given location.
+Moves player to a given location.  
+Alias: `move`
 
 - `--safe` – ensures the target location is not inside a block
 
@@ -109,7 +115,8 @@ Displays current spawn coordinates.
 Alias: `check`
 
 ### `player spawn set <x> <y> <z> [--safe]`
-Changes the world spawn point. Fails if new location is unsafe.
+Changes the world spawn point. Fails if new location is unsafe.  
+Alias: `change`
 
 - `--safe` – checks for block collisions above new spawnpoint
 
@@ -122,9 +129,11 @@ Sets player's health.
 Attempts to save player from dying:
 - Restores full HP
 - Moves player above lava if detected
+- Extinguishes fire
 - Patches hole under the player and removes fall damage
+- Revives player
 
-Will not take effect if the player is already dead.
+Note: upon revival items will remain on the floor.
 
 ---
 
@@ -135,6 +144,12 @@ Displays time spent in the world in `HH:MM:SS` format.
 
 - `--raw` – displays raw tick count (20 ticks = 1 second)
 
+### `map time day`
+Sets time to daytime.
+
+### `map time night`
+Sets time to nighttime.
+
 ### `map seed read`
 Displays world seed.
 
@@ -142,6 +157,18 @@ Displays world seed.
 Sets a new seed value.
 
 Warning: Changing the seed may cause terrain generation bugs in unexplored areas.
+
+### `map mob spawn <mobId> [-hp <hp>] [-count <count>] [-x <x>] [-y <y>] [-z <z>] `
+
+- If `-x`, `-y` or `-z` is not specified, player's current position is used.
+- `-count` - number of mobs to spawn
+- `-hp` - health points of mob (default: 10, each unit = half heart)
+
+### `map mob remove [-area <area>] [--passive] [--hostile]`
+
+- `-area` - radius around the player, measured in chunks, from which mobs should be removed. If not specified, mobs are removed only from player's current chunk.
+- `--passive` - if provided, passive mobs will be removed.
+- `--hostile` - if provided, hostile mobs will be removed.
 
 ### `map dimensions [-x <x>] [-z <z>]`
 Displays boundaries of the chunk that includes given coordinates.
@@ -154,5 +181,6 @@ Counts number of specific blocks in a chunk at given position.
 
 - `blockId` – block ID to search for
 - If `-x` / `-z` not provided, uses player’s position
+
 
 
