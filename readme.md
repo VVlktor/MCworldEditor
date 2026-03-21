@@ -1,4 +1,6 @@
-# MCworldEditor
+<img width="1920" height="700" alt="mcworldeditortitlecard" src="https://github.com/user-attachments/assets/0fa7646a-2bdf-4d7f-8171-f8a8e0a20cdf" />
+
+---
 
 **MCworldEditor** is a command-line interface (CLI) tool for editing Minecraft Beta world data.  
 It allows reading and modifying data from `level.dat` and region files, including operations on the player's inventory, health, position, spawn point, world seed, time, and more.
@@ -182,5 +184,8 @@ Counts number of specific blocks in a chunk at given position.
 - `blockId` – block ID to search for
 - If `-x` / `-z` not provided, uses player’s position
 
+---
 
+## Disclaimer
 
+This is a fan project and is not affiliated with, endorsed by, or associated with Mojang Studios or Microsoft Corporation.
