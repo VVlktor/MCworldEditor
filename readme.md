@@ -1,4 +1,4 @@
-<img width="1920" height="700" alt="mcworldeditortitlecard" src="https://github.com/user-attachments/assets/0fa7646a-2bdf-4d7f-8171-f8a8e0a20cdf" />
+<img width="1920" height="700" alt="mcworldeditortitlecard" src="https://github.com/user-attachments/assets/53ad3343-5f2b-469a-9322-a0438c9c7313" />
 
 ---
 
